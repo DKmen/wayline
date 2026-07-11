@@ -1,0 +1,12 @@
+pnpm-lock.yaml
+pnpm-workspace.yaml
+coverage
+dist
+.turbo
+
+# Third-party skill content (see .claude/skills/THIRD_PARTY_NOTICES.md) — kept
+# byte-identical to upstream so future updates diff cleanly; our own skills below
+# are the exception and stay Prettier-formatted like the rest of the repo.
+.claude/skills/*
+!.claude/skills/wayline-*
+!.claude/skills/THIRD_PARTY_NOTICES.md

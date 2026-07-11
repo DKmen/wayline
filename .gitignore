@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+.turbo/
+.worktrees/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+*.tsbuildinfo
+.vite/
+.wxt/
+.output/
+playwright-report/
+test-results/

@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Wayline Project Management'
+  short_description: 'Plan and control Wayline delivery.'
+  default_prompt: 'Use $wayline-project-management to prepare the next Wayline sprint and Plane-ready backlog.'
