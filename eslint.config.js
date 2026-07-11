@@ -36,6 +36,12 @@ export default tseslint.config(
       // No general "one function per file" rule exists (checked eslint-plugin-unicorn's
       // full rule set — nothing there); this is the one class-based analogue that does.
       'max-classes-per-file': ['error', 1],
+      // Recognize the standard "destructure to omit a key" idiom (e.g. `const { x: _x, ...rest } = obj`)
+      // as intentionally unused rather than flagging it.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
+      ],
     },
   },
   {
