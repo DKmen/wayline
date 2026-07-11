@@ -7,18 +7,18 @@ description: >
   review skills rather than duplicating them.
 when_to_use: >
   Starting work on a Plane ticket; opening a PR; finishing/merging a branch.
-allowed-tools: Read, Bash(git *)
+allowed-tools: Read, Bash(git *), mcp__plane__retrieve_work_item, mcp__plane__update_work_item, mcp__plane__create_work_item_comment, mcp__plane__list_states, mcp__plane__list_work_items
 ---
 
 # Wayline workflow (Plane bridge)
 
 This skill is a **thin adapter** — it must never contain its own TDD loop, its own branch-cleanup logic, or its own review-request logic. It only adds Plane-awareness at exactly three seams: ticket-pickup → branch creation; PR-open → ticket linkage; PR-merge → ticket close + proof. Everything else is Superpowers' job (or, if Superpowers isn't invoked in a given session, apply the same discipline directly: plan before coding, TDD, self-review before opening a PR).
 
-> **Before using this skill for real Plane operations**: confirm the actual Plane MCP tool names via `ToolSearch` — do not assume tool names like `create_issue`/`update_issue` exist until verified against the live connected server. This skill body deliberately does not hardcode tool names for that reason.
+Plane MCP tools confirmed live against the Wayline workspace (project id `c7cda4d3-5901-4b60-ad05-fa108adf6384`, identifier `WAYLI`): `list_work_items`/`retrieve_work_item` to look up a ticket, `update_work_item` (pass the target `state` id from `list_states`) to move it between states, `create_work_item_comment` to attach proof, `list_work_item_links`/`create_work_item_link` to link the merged PR URL.
 
 ## Branch naming convention
 
-`<type>/WAY-123-short-slug`, e.g. `feat/WAY-123-redaction-panel`, `fix/WAY-456-signed-url-ttl`. `<type>` reuses the same enum as the commit-message type (`feat`, `fix`, `refactor`, `perf`, `chore`, ...) — one vocabulary for both branch prefix and commit type, not two that can drift apart. The `WAY-123` shape must match whatever Plane's project identifier is actually configured to (assumed `WAY` — confirm against the live project settings before relying on it).
+`<type>/WAYLI-123-short-slug`, e.g. `feat/WAYLI-123-redaction-panel`, `fix/WAYLI-456-signed-url-ttl`. `<type>` reuses the same enum as the commit-message type (`feat`, `fix`, `refactor`, `perf`, `chore`, ...) — one vocabulary for both branch prefix and commit type, not two that can drift apart. Confirmed against the live Plane project: identifier is `WAYLI`.
 
 ## Workflow steps
 
@@ -42,7 +42,4 @@ This skill is a **thin adapter** — it must never contain its own TDD loop, its
 
 This skill only touches Plane. It never reimplements TDD, branch cleanup, or code-review logic that Superpowers (or plain good practice) already covers — if you find yourself writing that logic inside this skill, stop and delegate instead.
 
-## Open items — confirm, don't assume
-
 - Exact Plane MCP tool names for "update issue status," "add comment," and "attach file/link" — verify live before relying on them.
-- The `WAY-` ticket-ID prefix — confirm it matches the real Plane project's configured identifier.

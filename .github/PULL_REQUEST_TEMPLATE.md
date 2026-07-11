@@ -1,6 +1,6 @@
 ## Ticket
 
-<!-- Link the Plane ticket, e.g. WAY-123 -->
+<!-- Link the Plane ticket, e.g. WAYLI-123 -->
 
 ## Summary
 

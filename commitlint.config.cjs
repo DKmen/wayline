@@ -1,8 +1,8 @@
-const TICKET_PATTERN = /^WAY-\d+$/;
+const TICKET_PATTERN = /^WAYLI-\d+$/;
 const TYPES_REQUIRING_TICKET = new Set(['feat', 'fix', 'refactor', 'perf']);
 
 /**
- * Requires a WAY-123-shaped scope, but only for commit types that represent
+ * Requires a WAYLI-123-shaped scope, but only for commit types that represent
  * user-facing/behavioral change. chore/docs/style/test/build/ci commits (including
  * this repo's own bootstrap commit) don't need to trace back to a Plane ticket.
  */
@@ -16,7 +16,7 @@ function scopeTicketId(parsed) {
   if (!scope || !TICKET_PATTERN.test(scope)) {
     return [
       false,
-      `${type} commits must include a ticket scope like WAY-123, e.g. "${type}(WAY-123): short summary"`,
+      `${type} commits must include a ticket scope like WAYLI-123, e.g. "${type}(WAYLI-123): short summary"`,
     ];
   }
 

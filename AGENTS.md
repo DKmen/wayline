@@ -33,13 +33,13 @@ Every query against a tenant-owned table **must** go through the shared workspac
 
 1. Look up the ticket in Plane; confirm it's startable; read its description/acceptance criteria.
 2. Move the ticket to "In Progress" in Plane.
-3. Branch off latest `main`: `<type>/WAY-123-short-slug`, where `<type>` reuses the same enum as the commit-message type (`feat`, `fix`, `refactor`, `perf`, `chore`, ...).
+3. Branch off latest `main`: `<type>/WAYLI-123-short-slug`, where `<type>` reuses the same enum as the commit-message type (`feat`, `fix`, `refactor`, `perf`, `chore`, ...).
 4. Implement with a test-first discipline (write a failing test, make it pass, refactor) — brainstorm/plan first if the ticket is ambiguous rather than guessing at scope.
 5. Before opening a PR: run lint, typecheck, full test suite with coverage, and self-review the diff.
 6. Open the PR with the ticket ID in the title; fill out every field in `.github/PULL_REQUEST_TEMPLATE.md`; request review.
 7. After merge: move the Plane ticket to Done, attach proof (coverage summary tail, a Playwright HTML report link for UI-affecting changes, the CI run URL, and a one-line human-readable summary of what changed and why), and link the merged PR.
 
-Commit messages are Conventional Commits; `feat`/`fix`/`refactor`/`perf` commits require a `WAY-123`-shaped scope (enforced by commitlint) — `chore`/`docs`/`test`/`ci`/`build` commits don't need a ticket.
+Commit messages are Conventional Commits; `feat`/`fix`/`refactor`/`perf` commits require a `WAYLI-123`-shaped scope (enforced by commitlint) — `chore`/`docs`/`test`/`ci`/`build` commits don't need a ticket.
 
 ## Banned patterns
 
