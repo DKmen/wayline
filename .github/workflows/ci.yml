@@ -90,7 +90,13 @@ jobs:
         # shared browser cache), even though both pin the same Playwright version.
         run: pnpm --filter @wayline/fixture exec playwright install --with-deps chromium
       - name: e2e smoke suite (Playwright, not coverage-gated)
-        run: pnpm --filter @wayline/fixture test:e2e -- --grep @smoke
+        # No extra `--` before --grep: `pnpm --filter <pkg> <script> -- <args>` forwards
+        # everything after -- as one literal blob into the underlying `playwright test`
+        # invocation, so Playwright's own CLI parser sees "-- --grep @smoke" and treats
+        # --grep/its value as positional file-pattern args, not flags — silently running
+        # the full suite regardless of the tag filter. Confirmed via `--list`: with the
+        # extra --, --grep is ignored; without it, the filter genuinely narrows the run.
+        run: pnpm --filter @wayline/fixture test:e2e --grep @smoke
       - name: Upload Playwright HTML report
         if: always()
         uses: actions/upload-artifact@v7
