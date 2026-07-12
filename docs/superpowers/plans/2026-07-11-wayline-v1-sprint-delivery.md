@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `wayline-project-management` to maintain sprint control and `wayline-workflow` for any individual Plane ticket.
 
-**Goal:** Ship Wayline v1 through twelve independently demonstrable, dependency-ordered sprints.
+**Goal:** Ship Wayline v1 through thirteen independently demonstrable, dependency-ordered sprints — S0–S9 local-first, S10 the sole cloud-provisioning gate, S11–S13 landing/billing/launch.
 
 **Architecture:** Deliver vertical slices across extension, API, dashboard, rendering, and infrastructure. The dashboard never substitutes client state for server-side authorization, workspace scope, entitlement, or privacy enforcement.
 
@@ -25,8 +25,7 @@
 - [x] Define Step, TargetDescriptor, event, role, and entitlement schemas in `packages/shared-types`.
 - [x] Establish Docker parity services, environment validation, repository quality gates, and fixture coverage.
 - [x] Create the `packages/ui` token/Storybook baseline. (The dashboard app scaffold itself is S1 scope — `WAYLI-29` — not S0; this bullet originally conflated the two, corrected during the WAYLI-26 reconciliation pass.)
-- [ ] Provision the AWS organization/accounts, GitHub OIDC provider, OpenTofu state backend, Route 53/ACM, SES verification/production-access request, and empty dev VPC (`WAYLI-83`).
-- [ ] Acceptance: `pnpm dev`, lint, typecheck, tests, and build run locally and in CI; `tofu apply` stands up the empty dev VPC.
+- [x] Acceptance: `pnpm dev`, lint, typecheck, tests, and build run locally and in CI. (AWS/OpenTofu provisioning — `WAYLI-83` — moved out of S0 into S10 during the local-first rebaseline; see the Decisions & Risk Log below.)
 
 ### S1 — Auth and Workspaces
 
@@ -83,17 +82,23 @@
 - [ ] Create dashboard members, settings, and event-driven onboarding tickets.
 - [ ] Acceptance: invite-to-watch-to-follow-live passes end-to-end and checklist progress is observed rather than manually asserted.
 
-### S10 — Landing and Freemium
+### S10 — Cloud Foundation and Dev Deployment
+
+- [ ] Create AWS org/account, GitHub OIDC, OpenTofu state/VPC, and DNS/ACM/SES tickets (`WAYLI-83`).
+- [ ] Create managed data/media adapter, API/worker cloud deployment, protected CI/CD, and dev acceptance-gate tickets (`WAYLI-86`–`WAYLI-89`).
+- [ ] Acceptance: `tofu apply` stands up the dev VPC and managed services; GitHub deploys to dev only through environment-scoped OIDC; the dev smoke suite passes with parity to the local e2e suite; `wayline.app`'s existing Cloudflare/Vercel DNS and email are untouched.
+
+### S11 — Landing and Freemium
 
 - [ ] Create landing, legal, waitlist, entitlement UI, usage meter, upgrade modal, and analytics-gating tickets.
 - [ ] Acceptance: the landing is deployed and a fourth free-tier publication fails through both UI and direct API request.
 
-### S11 — Billing and Hardening
+### S12 — Billing and Hardening
 
 - [ ] Create Stripe checkout, portal, webhook, plan-sync, downgrade, rate-limit, WAF, Sentry, load, and restore-drill tickets.
 - [ ] Acceptance: Stripe test-mode plan changes update entitlements and the security/restore gates pass.
 
-### S12 — Pilot and Launch
+### S13 — Pilot and Launch
 
 - [ ] Create Chrome Web Store, pilot onboarding, alarm tuning, release readiness, and waitlist rollout tickets.
 - [ ] Acceptance: pilot teams meet the v1 product criteria and alarms remain quiet for 72 hours.
@@ -110,6 +115,14 @@ Material scope/product/security/privacy decisions, by sprint. Appended at closeo
 - **Scope correction**: this delivery plan's S0 checklist had conflated the dashboard app scaffold with the `packages/ui` token/Storybook baseline. The live Plane backlog (`docs/plane/wayline-v1-backlog.md`) and the S0/S1 epics never actually included a dashboard scaffold under S0 — that's `WAYLI-29` (S1). No scope was dropped; the checklist wording was just imprecise and is now corrected.
 - **AWS-foundation backlog correction**: the roadmap requires AWS accounts, OIDC, remote OpenTofu state, Route 53/ACM, SES setup, and an applied empty dev VPC in S0, but the original Plane import had no child ticket for that work and the repository contains no OpenTofu configuration. `WAYLI-83` now carries the missing scope. S0 remains open until that ticket and the sprint acceptance gate are proven; no completed local-foundation work was reclassified.
 - **Agent workflow parity**: Claude already had the ticket-to-Plane adapter in `.claude/skills/wayline-workflow`; Codex only had the portfolio-level `wayline-project-management` skill while referring to the missing adapter. Added a Codex-compatible `skills/wayline-workflow` counterpart with the same pickup, review, QA, merge, evidence, and closeout seams. Each runtime keeps native frontmatter while sharing the same project rules.
+
+### Local-first rebaseline (`WAYLI-84`)
+
+- **Decision**: AWS/DNS provisioning waits until the entire product works locally, rather than starting in S0/S1 as originally planned. While scoping `WAYLI-83`, two facts changed the calculus: `wayline.app` is **already live** — Cloudflare is authoritative DNS, the apex points at Vercel, and Cloudflare handles email routing — so an early Route 53 cutover risked breaking the live site/mail for no product benefit yet; and the two existing AWS accounts aren't under an Organization yet, so account-layout choices are still open. The user decided cloud work should be a single, deliberate, late gate instead of scattered across early sprints.
+- **Roadmap change**: S0–S9 are now explicitly local-first (docker-compose Postgres/MinIO/ElasticMQ/Mailpit + the render-worker's local poll mode prove the whole product before any cloud account exists). A new **S10 — Cloud Foundation and Dev Deployment** sprint is inserted, carrying `WAYLI-83` plus four new tickets (managed data/media adapters, API/worker cloud deployment, protected CI/CD, dev acceptance gate). Landing/Freemium, Billing/Hardening, and Pilot/Launch shift one sprint later to S11/S12/S13. Milestone `M5` extends two weeks (target date → 2027-01-22) to absorb the inserted sprint.
+- **S0 closeout**: with `WAYLI-83` correctly out of S0's scope and `WAYLI-21`–`26` genuinely Done, S0 closed to `Done`; S1 activated (`WAYLI-27` moved `Backlog` → `Todo`, the only ready S1 ticket).
+- **WAYLI-28 clarification**: workspace tenancy (`WAYLI-28`) reuses Better Auth's own user/session/account tables (from `WAYLI-27`) instead of creating a parallel identity model — a real de-duplication decision, not a rename.
+- **Non-goal, held firm**: no AWS account, resource, or credential was created or modified by this rebaseline, and `wayline.app`'s existing DNS/email were not touched — this ticket is Plane hierarchy and repository docs only.
 
 ## Sprint Closeout
 
