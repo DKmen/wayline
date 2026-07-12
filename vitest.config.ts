@@ -57,6 +57,11 @@ export default defineConfig({
         // exercised by the jsdom unit-test tier and have no logic of their own to cover.
         '**/*.stories.tsx',
         '**/*.stories.ts',
+        // apps/fixture is Playwright-only test-fixture content (docs/06 §8) — exercised
+        // exclusively by its own e2e suite, never imported by a Vitest/jsdom test. Vitest 4's
+        // coverage.include (above) force-includes unimported files, so without this every
+        // fixture source file would count as 0%-covered dead weight against the threshold.
+        'apps/fixture/**',
       ],
       thresholds: {
         lines: 95,
