@@ -7,42 +7,42 @@ Create one Plane parent per sprint using the names below. Create the listed chil
 - Workspace: `WAYLI`
 - Project: `Wayline` (`c7cda4d3-5901-4b60-ad05-fa108adf6384`)
 - Created from source: `wayline-v1-plan-2026-07-11`
-- Planned hierarchy: 13 sprint epics + 62 child tasks = 75 work items
-- S0 is startable (`Todo`); S1–S12 remain dependency-gated (`Backlog`).
+- Planned hierarchy after WAYLI-26 reconciliation: 13 sprint epics + 63 child tasks = 76 work items
+- S0 is active (`In Progress`); S1–S12 remain dependency-gated (`Backlog`).
 
-| Sprint | Epic       | Child work items      |
-| ------ | ---------- | --------------------- |
-| S0     | `WAYLI-9`  | `WAYLI-21`–`WAYLI-26` |
-| S1     | `WAYLI-10` | `WAYLI-27`–`WAYLI-30` |
-| S2     | `WAYLI-8`  | `WAYLI-31`–`WAYLI-34` |
-| S3     | `WAYLI-13` | `WAYLI-35`–`WAYLI-39` |
-| S4     | `WAYLI-15` | `WAYLI-40`–`WAYLI-44` |
-| S5     | `WAYLI-14` | `WAYLI-45`–`WAYLI-50` |
-| S6     | `WAYLI-16` | `WAYLI-51`–`WAYLI-55` |
-| S7     | `WAYLI-12` | `WAYLI-56`–`WAYLI-59` |
-| S8     | `WAYLI-11` | `WAYLI-60`–`WAYLI-63` |
-| S9     | `WAYLI-17` | `WAYLI-64`–`WAYLI-68` |
-| S10    | `WAYLI-18` | `WAYLI-69`–`WAYLI-73` |
-| S11    | `WAYLI-19` | `WAYLI-74`–`WAYLI-78` |
-| S12    | `WAYLI-20` | `WAYLI-79`–`WAYLI-82` |
+| Sprint | Epic       | Child work items                  |
+| ------ | ---------- | --------------------------------- |
+| S0     | `WAYLI-9`  | `WAYLI-21`–`WAYLI-26`, `WAYLI-83` |
+| S1     | `WAYLI-10` | `WAYLI-27`–`WAYLI-30`             |
+| S2     | `WAYLI-8`  | `WAYLI-31`–`WAYLI-34`             |
+| S3     | `WAYLI-13` | `WAYLI-35`–`WAYLI-39`             |
+| S4     | `WAYLI-15` | `WAYLI-40`–`WAYLI-44`             |
+| S5     | `WAYLI-14` | `WAYLI-45`–`WAYLI-50`             |
+| S6     | `WAYLI-16` | `WAYLI-51`–`WAYLI-55`             |
+| S7     | `WAYLI-12` | `WAYLI-56`–`WAYLI-59`             |
+| S8     | `WAYLI-11` | `WAYLI-60`–`WAYLI-63`             |
+| S9     | `WAYLI-17` | `WAYLI-64`–`WAYLI-68`             |
+| S10    | `WAYLI-18` | `WAYLI-69`–`WAYLI-73`             |
+| S11    | `WAYLI-19` | `WAYLI-74`–`WAYLI-78`             |
+| S12    | `WAYLI-20` | `WAYLI-79`–`WAYLI-82`             |
 
 ## Parent tickets
 
-| Parent title                  | Child-ticket groups                                                         | Dependency |
-| ----------------------------- | --------------------------------------------------------------------------- | ---------- |
-| S0 — Foundations              | Shared contracts; local stack; CI; UI foundation; fixture; delivery control | None       |
-| S1 — Auth and workspaces      | Auth; tenancy; role guards; dashboard shell                                 | S0         |
-| S2 — Extension session bridge | Extension shell; cookie bridge; permissions; onboarding detection           | S1         |
-| S3 — Capture and local drafts | Capture; screenshots; descriptors; IndexedDB; draft library                 | S2         |
-| S4 — Editor and redaction     | Editor; history; redaction; publish blocker                                 | S3         |
-| S5 — Publish and video        | Publish API; assets; renderer; player; signed delivery                      | S4         |
-| S6 — Live walkthrough         | Resolver; walkthrough controls; spotlight; follow-live entry                | S5         |
-| S7 — Safe failure and reports | Pause cards; reporting; completion; resume                                  | S6         |
-| S8 — Analytics                | Events; rollups; flow analytics                                             | S7         |
-| S9 — Team and onboarding      | Invites; roles; settings; checklist                                         | S8         |
-| S10 — Landing and freemium    | Landing; legal; entitlements; upgrades                                      | S9         |
-| S11 — Billing and hardening   | Stripe; resilience; security; DR                                            | S10        |
-| S12 — Pilot and launch        | CWS; pilot; observability; release                                          | S11        |
+| Parent title                  | Child-ticket groups                                                                         | Dependency |
+| ----------------------------- | ------------------------------------------------------------------------------------------- | ---------- |
+| S0 — Foundations              | Shared contracts; local stack; CI; UI foundation; fixture; delivery control; AWS foundation | None       |
+| S1 — Auth and workspaces      | Auth; tenancy; role guards; dashboard shell                                                 | S0         |
+| S2 — Extension session bridge | Extension shell; cookie bridge; permissions; onboarding detection                           | S1         |
+| S3 — Capture and local drafts | Capture; screenshots; descriptors; IndexedDB; draft library                                 | S2         |
+| S4 — Editor and redaction     | Editor; history; redaction; publish blocker                                                 | S3         |
+| S5 — Publish and video        | Publish API; assets; renderer; player; signed delivery                                      | S4         |
+| S6 — Live walkthrough         | Resolver; walkthrough controls; spotlight; follow-live entry                                | S5         |
+| S7 — Safe failure and reports | Pause cards; reporting; completion; resume                                                  | S6         |
+| S8 — Analytics                | Events; rollups; flow analytics                                                             | S7         |
+| S9 — Team and onboarding      | Invites; roles; settings; checklist                                                         | S8         |
+| S10 — Landing and freemium    | Landing; legal; entitlements; upgrades                                                      | S9         |
+| S11 — Billing and hardening   | Stripe; resilience; security; DR                                                            | S10        |
+| S12 — Pilot and launch        | CWS; pilot; observability; release                                                          | S11        |
 
 ## Ticket template
 

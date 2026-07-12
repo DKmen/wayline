@@ -21,11 +21,12 @@
 
 ### S0 — Foundations
 
-- [ ] Create Plane parent and child tickets for shared contracts, local stack, CI, UI tokens, fixture, and project-management skills.
-- [ ] Define Step, TargetDescriptor, event, role, and entitlement schemas in `packages/shared-types`.
-- [ ] Establish Docker parity services, environment validation, repository quality gates, and fixture coverage.
-- [ ] Create the dashboard scaffold and `packages/ui` token/Storybook baseline.
-- [ ] Acceptance: `pnpm dev`, lint, typecheck, tests, and build run locally and in CI.
+- [x] Create Plane parent and child tickets for shared contracts, local stack, CI, UI tokens, fixture, and project-management skills.
+- [x] Define Step, TargetDescriptor, event, role, and entitlement schemas in `packages/shared-types`.
+- [x] Establish Docker parity services, environment validation, repository quality gates, and fixture coverage.
+- [x] Create the `packages/ui` token/Storybook baseline. (The dashboard app scaffold itself is S1 scope — `WAYLI-29` — not S0; this bullet originally conflated the two, corrected during the WAYLI-26 reconciliation pass.)
+- [ ] Provision the AWS organization/accounts, GitHub OIDC provider, OpenTofu state backend, Route 53/ACM, SES verification/production-access request, and empty dev VPC (`WAYLI-83`).
+- [ ] Acceptance: `pnpm dev`, lint, typecheck, tests, and build run locally and in CI; `tofu apply` stands up the empty dev VPC.
 
 ### S1 — Auth and Workspaces
 
@@ -96,6 +97,19 @@
 
 - [ ] Create Chrome Web Store, pilot onboarding, alarm tuning, release readiness, and waitlist rollout tickets.
 - [ ] Acceptance: pilot teams meet the v1 product criteria and alarms remain quiet for 72 hours.
+
+## Decisions & Risk Log
+
+Material scope/product/security/privacy decisions, by sprint. Appended at closeout per the Sprint Closeout gate below — not edited retroactively.
+
+### S0
+
+- **Repo visibility**: `DKmen/wayline` switched private → public (`WAYLI-22`). GitHub branch-protection Rulesets require GitHub Pro for private repos on a free account; going public was the user's explicit choice over a process-only gate, made after a full git-history secret scan confirmed the repo was clean.
+- **Danger token contrast**: shadcn's default destructive/danger red failed WCAG AA against Wayline's theme once the real-browser Storybook a11y tier could actually check it (`WAYLI-24`). Darkened using real sRGB→OKLab→OKLCH conversion + WCAG contrast math rather than accepting the library default.
+- **Fixture architecture** (`WAYLI-25`): vanilla TS + Vite, no framework — keeps DOM mutations for the target-change case deterministic (no virtual-DOM reconciliation). Same-origin iframe only; cross-origin deferred to S2 alongside the extension (needs the extension to verify against). Playwright harness is package-scoped (`apps/fixture` owns its own config), not shared at root, anticipating S2's `chromium.launchPersistentContext`-based extension suite needing a fundamentally different launch mechanism.
+- **Scope correction**: this delivery plan's S0 checklist had conflated the dashboard app scaffold with the `packages/ui` token/Storybook baseline. The live Plane backlog (`docs/plane/wayline-v1-backlog.md`) and the S0/S1 epics never actually included a dashboard scaffold under S0 — that's `WAYLI-29` (S1). No scope was dropped; the checklist wording was just imprecise and is now corrected.
+- **AWS-foundation backlog correction**: the roadmap requires AWS accounts, OIDC, remote OpenTofu state, Route 53/ACM, SES setup, and an applied empty dev VPC in S0, but the original Plane import had no child ticket for that work and the repository contains no OpenTofu configuration. `WAYLI-83` now carries the missing scope. S0 remains open until that ticket and the sprint acceptance gate are proven; no completed local-foundation work was reclassified.
+- **Agent workflow parity**: Claude already had the ticket-to-Plane adapter in `.claude/skills/wayline-workflow`; Codex only had the portfolio-level `wayline-project-management` skill while referring to the missing adapter. Added a Codex-compatible `skills/wayline-workflow` counterpart with the same pickup, review, QA, merge, evidence, and closeout seams. Each runtime keeps native frontmatter while sharing the same project rules.
 
 ## Sprint Closeout
 
