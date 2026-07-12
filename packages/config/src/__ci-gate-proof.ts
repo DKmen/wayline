@@ -37,6 +37,7 @@ export function uncoveredCiGateProofThree(n: number): number {
   return total;
 }
 
-// Recognizable AWS Access Key ID pattern (AWS's own documentation example) — proves
-// gitleaks actually flags a real secret pattern.
-export const CI_GATE_PROOF_FAKE_SECRET = 'AKIAIOSFODNN7EXAMPLE';
+// AWS Access Key ID pattern (AKIA + 16 random alphanumeric chars) — proves gitleaks
+// flags a real secret pattern. Not the well-known AWS-docs example value, which
+// gitleaks' default allowlist deliberately ignores as a known placeholder.
+export const CI_GATE_PROOF_FAKE_SECRET = 'AKIAQZRPMDXXVNJHK3WY';
