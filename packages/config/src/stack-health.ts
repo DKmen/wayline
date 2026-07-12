@@ -1,5 +1,11 @@
 import net from 'node:net';
 
+// One-thing-per-file exception (CLAUDE.md): checkHttpService and checkTcpService are
+// grouped here because both are thin reachability probes sharing ServiceCheckResult and
+// the same bounded-timeout race pattern — splitting them would duplicate that pattern
+// for no benefit.
+
+/** Outcome of probing a single local-stack service for reachability. */
 export interface ServiceCheckResult {
   name: string;
   ok: boolean;

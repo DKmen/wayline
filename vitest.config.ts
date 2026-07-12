@@ -17,9 +17,9 @@ export default defineConfig({
         '**/dist/**',
         '**/*.test.*',
         '**/*.spec.*',
-        // Thin CLI entrypoints (console.log + exit code, no branching logic beyond
-        // what their underlying functions already cover) — verified manually per
-        // docs/08-local-dev.md §5, not coverage-gated.
+        // Thin CLI entrypoints (console.log + exit code) — the branching they do add
+        // (e.g. exit-code-from-results) is verified manually per docs/08-local-dev.md §5,
+        // not coverage-gated.
         '**/*.cli.ts',
       ],
       thresholds: {
