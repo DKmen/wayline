@@ -17,7 +17,7 @@ Read in order for the full picture; each doc stands alone for reference.
 | 08  | [Local dev](./08-local-dev.md)                   | Monorepo layout, docker-compose parity stack (no LocalStack — decision inside)     |
 | 09  | [Security & privacy](./09-security-privacy.md)   | The four guarantees, controls, retention, CWS compliance                           |
 | 10  | [Analytics spec](./10-analytics-spec.md)         | Event taxonomy, rollups, compliance-framed dashboards                              |
-| 11  | [Roadmap & sprints](./11-roadmap-sprints.md)     | 12 sprints / 5 milestones to production launch                                     |
+| 11  | [Roadmap & sprints](./11-roadmap-sprints.md)     | 13 sprints / 5 milestones, local-first through S9 then a single cloud gate at S10  |
 
 **Design reference**: `App workflow and design specification.pdf` — approved hi-fi mockups (screens 2a–2g), canonical for visual direction.
 

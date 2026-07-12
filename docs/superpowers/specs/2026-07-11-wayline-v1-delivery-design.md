@@ -2,12 +2,13 @@
 
 ## Goal
 
-Deliver the private-by-default workflow-capture product through twelve two-week vertical slices, with the dashboard developed alongside its API and extension dependencies.
+Deliver the private-by-default workflow-capture product through thirteen two-week vertical slices, with the dashboard developed alongside its API and extension dependencies.
 
 ## Delivery model
 
 - The repository plan is the technical source of truth; Plane is the daily execution board.
 - Each sprint has one parent ticket and independently testable child tickets. Tickets record scope, dependencies, acceptance criteria, affected surfaces, positive/negative tests, and closeout evidence.
+- Sequencing is local-first: S0–S9 build and prove the entire product against the local docker-compose stack, with zero AWS account, DNS, or credential in existence. S10 is the single dedicated cloud-provisioning gate; only S11–S13 (landing, billing, launch) touch production DNS/traffic.
 - `wayline-project-management` manages portfolio-level planning; `wayline-workflow` governs picked-up ticket delivery.
 - Shared Zod schemas in `packages/shared-types` are the only wire contracts. Server-side workspace scoping, entitlement enforcement, redaction validation, and asset authorization remain authoritative.
 

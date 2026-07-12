@@ -1,6 +1,6 @@
 # Wayline
 
-Private-by-default browser workflow capture — TypeScript monorepo, solo/part-time dev, 12×2-week sprints. Full doc map and pitch: [docs/00-product-brief.md](./docs/00-product-brief.md). Stack summary: [docs/03-architecture.md §1](./docs/03-architecture.md). This file is the _entry point_; it points at docs/skills rather than forking their content — edit the source, not the pointer.
+Private-by-default browser workflow capture — TypeScript monorepo, solo/part-time dev, 13×2-week sprints (local-first through S9, a single cloud-provisioning gate at S10). Full doc map and pitch: [docs/00-product-brief.md](./docs/00-product-brief.md). Stack summary: [docs/03-architecture.md §1](./docs/03-architecture.md). This file is the _entry point_; it points at docs/skills rather than forking their content — edit the source, not the pointer.
 
 Apps: `extension` (WXT/MV3), `dashboard` (Vite+React), `landing` (Astro), `api` (Hono+Drizzle), `render-worker` (Lambda ffmpeg/sharp), `fixture` (test-only target site). Packages: `shared-types`, `ui`, `config`.
 
