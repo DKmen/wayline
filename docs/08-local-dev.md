@@ -76,17 +76,18 @@ Rules:
 
 ## 5. Developer workflows
 
-| Task                       | Command                                                                                 |
-| -------------------------- | --------------------------------------------------------------------------------------- |
-| Full stack up              | `docker compose up -d && pnpm dev`                                                      |
-| Verify parity stack is up  | `pnpm stack:health` (checks postgres/elasticmq/minio/mailpit, exit 0 iff all reachable) |
-| DB migrate / new migration | `pnpm db:migrate` / `pnpm db:generate` (Drizzle Kit)                                    |
-| Seed demo data             | `pnpm db:seed` (demo workspace, 2 flows, fake events)                                   |
-| Unit tests                 | `pnpm test` (Vitest, affected-only via turbo)                                           |
-| E2E                        | `pnpm test:e2e` (Playwright: extension against `apps/fixture`; dashboard flows)         |
-| Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)                    |
-| Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                                 |
-| Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                        |
+| Task                       | Command                                                                                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Full stack up              | `docker compose up -d && pnpm dev`                                                                                                                                             |
+| Verify parity stack is up  | `pnpm stack:health` (checks postgres/elasticmq/minio/mailpit, exit 0 iff all reachable)                                                                                        |
+| DB migrate / new migration | `pnpm db:migrate` / `pnpm db:generate` (Drizzle Kit)                                                                                                                           |
+| Seed demo data             | `pnpm db:seed` (demo workspace, 2 flows, fake events)                                                                                                                          |
+| Unit tests                 | `pnpm test` (Vitest, full-repo — one shared root config, not per-package)                                                                                                      |
+| Storybook (`packages/ui`)  | `pnpm --filter @wayline/ui dev` (one-time setup: `npx playwright install chromium`, needed for `pnpm --filter @wayline/ui test:storybook`'s real-browser a11y/contrast checks) |
+| E2E                        | `pnpm test:e2e` (Playwright: extension against `apps/fixture`; dashboard flows)                                                                                                |
+| Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)                                                                                                           |
+| Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                                                                                                                        |
+| Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                                                                                                               |
 
 ## 6. Quality gates (repo-wide, from Sprint 0)
 

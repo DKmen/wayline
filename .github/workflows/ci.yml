@@ -29,7 +29,12 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm run typecheck:scripts
       - run: pnpm run verify:lint-rules
+      - run: pnpm run verify:no-hardcoded-colors
       - run: pnpm test:coverage
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Storybook a11y/contrast tier (not coverage-gated — real-browser only)
+        run: pnpm --filter @wayline/ui test:storybook
       - run: pnpm build
 
   commitlint:
