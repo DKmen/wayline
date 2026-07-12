@@ -11,12 +11,10 @@ commit-msg:
 
 pre-push:
   commands:
-    test-affected:
-      # Falls back to a full run when origin/main can't be resolved (first-ever push,
-      # shallow clone, or a base ref that hasn't been fetched yet).
-      run: >-
-        if git rev-parse --verify origin/main >/dev/null 2>&1; then
-          pnpm exec turbo run test --filter='...[origin/main...HEAD]';
-        else
-          pnpm exec turbo run test;
-        fi
+    test:
+      # vitest.config.ts is a single shared root config (not per-package), so a
+      # turbo --filter=affected invocation doesn't actually narrow what runs — every
+      # invocation executes the same full-repo suite regardless of which package
+      # triggered it. Running it directly, once, is simpler and avoids the parallel
+      # per-package invocations racing on the same coverage output directory.
+      run: pnpm test

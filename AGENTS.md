@@ -18,7 +18,7 @@ One component/function per file is a stated rule. Mechanically enforced only for
 
 ## Testing discipline
 
-- Vitest + v8 coverage provider, **95% thresholds** (lines/branches/functions/statements). CI is the authoritative gate; `pre-push` (Lefthook) re-runs it on affected packages only as a fast local backstop, never a substitute for CI.
+- Vitest + v8 coverage provider, **95% thresholds** (lines/branches/functions/statements). CI is the authoritative gate; `pre-push` (Lefthook) re-runs the full-repo suite locally as a fast backstop, never a substitute for CI. (`vitest.config.ts` is one shared root config, not per-package, so there's no meaningful "affected packages only" to filter to.)
 - Playwright e2e/integration tests are **not** coverage-gated — CI pass/fail only.
 - **Positive + negative test discipline**: every exported function/handler/component with branching logic needs at least one test proving intended behavior and at least one proving correct handling of bad input, unauthorized access, or an edge case.
 - **Be honest about this**: no tool mechanically verifies "every function has both a positive and a negative test." Coverage thresholds and `expect-expect`-style lint rules only _nudge_ toward it — they prove code executed and something was asserted, not that the negative case was meaningful. This is a code-review/PR-checklist responsibility.

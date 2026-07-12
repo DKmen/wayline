@@ -30,7 +30,7 @@ One component/function per file is a _stated rule_ here, not aspirational. It's 
 
 ## Testing discipline
 
-- Vitest + v8 provider, **95% thresholds** (lines/branches/functions/statements). CI is authoritative; `pre-push` (Lefthook) runs the same thresholds on affected packages only, as a fast local backstop — not a substitute for CI.
+- Vitest + v8 provider, **95% thresholds** (lines/branches/functions/statements). CI is authoritative; `pre-push` (Lefthook) re-runs the same full-repo suite locally as a fast backstop — not a substitute for CI. (`vitest.config.ts` is a single shared root config, not per-package, so there's no meaningful "affected packages only" to filter to.)
 - Playwright e2e/integration is **not** coverage-gated — CI pass/fail only (Playwright has no real coverage concept to gate on).
 - **Positive + negative test requirement — stated as discipline, not tooling**: every exported function/handler/component with branching logic needs ≥1 test proving intended behavior and ≥1 proving correct rejection/handling of bad input, unauthorized access, or an edge case.
 - **Honesty clause**: no tool mechanically verifies "every function has both a positive and a negative test." 95% branch coverage + `eslint-plugin-jest`'s `expect-expect` only nudge toward it (branches get exercised, every test asserts _something_) — neither proves the negative case is meaningful. This is a code-review / PR-checklist responsibility, full stop.

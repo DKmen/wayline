@@ -13,8 +13,8 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
-    "test:coverage": "turbo run test -- --coverage",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "stack:health": "tsx packages/config/src/check-stack.cli.ts",
     "verify:lint-rules": "tsx scripts/verify-security-lint-rules.ts",
     "typecheck:scripts": "tsc -p scripts/tsconfig.json --noEmit"
