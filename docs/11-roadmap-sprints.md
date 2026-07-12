@@ -10,7 +10,7 @@
 - **M4 — Team product** (end S9): invites, roles, analytics, onboarding.
 - **M5 — Production launch** (end S13): cloud foundation, landing, billing, CWS listing, hardening.
 
-Dependency spine: S0 → S1 → S2(capture) → S3(editor) → S4(publish) → S5(video) → S6–7(walkthrough) → S8(analytics) → S9(team/onboarding) → S10(cloud foundation) → S11(landing/gating) → S12(billing/hardening) → S13(launch). Slack is built in: any sprint may spill one week without moving M5 past month 7.
+Dependency spine: S0 → S1 → S2(capture) → S3(editor) → S4(publish) → S5(video) → S6–7(walkthrough) → S8(analytics) → S9(team/onboarding) → S10(cloud foundation) → S11(landing/gating) → S12(billing/hardening) → S13(launch). Slack is tighter now that S10 inserts a dedicated sprint: the original 12-sprint plan's one-week-per-sprint buffer before M5 pushed past month 7 is now mostly absorbed by S10, leaving only a few days of spill room.
 
 **Local-first**: S0–S9 build and prove the entire product against the local docker-compose stack (Postgres/MinIO/ElasticMQ/Mailpit + the render-worker's local poll mode) — no AWS account, DNS, or credential exists yet. S10 is the single, dedicated gate where cloud infrastructure is provisioned and proven before any later sprint touches it; see the Decisions & Risk Log in `docs/superpowers/plans/2026-07-11-wayline-v1-sprint-delivery.md` for why.
 

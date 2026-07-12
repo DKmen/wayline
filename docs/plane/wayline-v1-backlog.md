@@ -7,12 +7,12 @@ Create one Plane parent per sprint using the names below. Create the listed chil
 - Workspace: `WAYLI`
 - Project: `Wayline` (`c7cda4d3-5901-4b60-ad05-fa108adf6384`)
 - Created from source: `wayline-v1-plan-2026-07-11`
-- Planned hierarchy after the WAYLI-84 local-first rebaseline: 14 sprint epics + 67 child tasks = 81 work items
+- Planned hierarchy after the WAYLI-84 local-first rebaseline: 14 sprint epics + 68 child tasks = 82 work items
 - S0 is `Done`; S1 is active (`WAYLI-27` is `Todo`); S2–S13 remain dependency-gated (`Backlog`).
 
 | Sprint | Epic       | Child work items                  |
 | ------ | ---------- | --------------------------------- |
-| S0     | `WAYLI-9`  | `WAYLI-21`–`WAYLI-26`             |
+| S0     | `WAYLI-9`  | `WAYLI-21`–`WAYLI-26`, `WAYLI-84` |
 | S1     | `WAYLI-10` | `WAYLI-27`–`WAYLI-30`             |
 | S2     | `WAYLI-8`  | `WAYLI-31`–`WAYLI-34`             |
 | S3     | `WAYLI-13` | `WAYLI-35`–`WAYLI-39`             |
