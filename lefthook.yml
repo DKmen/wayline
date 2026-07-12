@@ -12,4 +12,11 @@ commit-msg:
 pre-push:
   commands:
     test-affected:
-      run: pnpm exec turbo run test -- --filter=...[origin/main...HEAD]
+      # Falls back to a full run when origin/main can't be resolved (first-ever push,
+      # shallow clone, or a base ref that hasn't been fetched yet).
+      run: >-
+        if git rev-parse --verify origin/main >/dev/null 2>&1; then
+          pnpm exec turbo run test --filter='...[origin/main...HEAD]';
+        else
+          pnpm exec turbo run test;
+        fi
