@@ -13,28 +13,30 @@ LocalStack killed its free Community Edition (March 2026): the free "Hobby" tier
 
 ## 2. docker-compose parity stack
 
-| Prod service         | Local stand-in                                                                             | Notes                                                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| RDS Postgres 16      | `postgres:16`                                                                              | identical                                                                                                               |
-| SQS                  | **ElasticMQ** (`softwaremill/elasticmq`)                                                   | SQS-compatible REST; SDK endpoint override only. Actively maintained.                                                   |
-| S3 + signed URLs     | **MinIO (pinned pre-archival image)** or Garage                                            | MinIO project is archived (April 2026) but a pinned image is a zero-risk dev dependency; swap to Garage if it bit-rots. |
-| SES                  | **Mailpit** (SMTP) via a mailer port: `SesMailer` in prod, `SmtpMailer` locally            | Web UI at :8025 to click magic links. (`aws-ses-v2-local` is the alternative if we'd rather keep the SES SDK path.)     |
-| Lambda render worker | same worker code run as a long-poll consumer container (`pnpm --filter render-worker dev`) | one `handler(job)` core, two entrypoints: Lambda adapter + poll loop                                                    |
-| CloudFront signing   | dev flag: API returns direct MinIO presigned URLs                                          | signing code paths covered by integration tests against the dev AWS account                                             |
+| Prod service         | Local stand-in                                                                             | Notes                                                                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RDS Postgres 16      | `postgres:16`                                                                              | identical                                                                                                                                               |
+| SQS                  | **ElasticMQ** (`softwaremill/elasticmq`)                                                   | SQS-compatible REST; SDK endpoint override only. Actively maintained.                                                                                   |
+| S3 + signed URLs     | **MinIO** (`minio/minio:RELEASE.2025-09-07T16-13-09Z`) or Garage                           | MinIO project is archived (April 2026); this is the last confirmed pre-archival tag — a zero-risk pinned dev dependency, swap to Garage if it bit-rots. |
+| SES                  | **Mailpit** (SMTP) via a mailer port: `SesMailer` in prod, `SmtpMailer` locally            | Web UI at :8025 to click magic links. (`aws-ses-v2-local` is the alternative if we'd rather keep the SES SDK path.)                                     |
+| Lambda render worker | same worker code run as a long-poll consumer container (`pnpm --filter render-worker dev`) | one `handler(job)` core, two entrypoints: Lambda adapter + poll loop                                                                                    |
+| CloudFront signing   | dev flag: API returns direct MinIO presigned URLs                                          | signing code paths covered by integration tests against the dev AWS account                                                                             |
 
 ```yaml
 # docker-compose.yml (root)
 services:
   db: { image: postgres:16, ports: ['5432:5432'], environment: { POSTGRES_PASSWORD: wayline } }
-  sqs: { image: softwaremill/elasticmq-native, ports: ['9324:9324'] }
+  sqs: { image: softwaremill/elasticmq-native:1.6.9, ports: ['9324:9324'] }
   s3:
     {
-      image: minio/minio:RELEASE.2025-xx,
+      image: minio/minio:RELEASE.2025-09-07T16-13-09Z,
       command: server /data --console-address ":9001",
       ports: ['9000:9000', '9001:9001'],
     }
-  mail: { image: axllent/mailpit, ports: ['8025:8025', '1025:1025'] }
+  mail: { image: axllent/mailpit:v1.30.4, ports: ['8025:8025', '1025:1025'] }
 ```
+
+All four images are pinned to a specific tag — no `:latest` — so the parity stack can't silently drift. Run `pnpm stack:health` (§5) after `docker compose up -d` to confirm every service is actually reachable.
 
 `pnpm dev` (turbo) starts: compose stack, API with `.env.local` endpoint overrides, dashboard Vite server, WXT dev browser with the extension pre-loaded, worker in poll mode, and a **fixture web app** (`apps/fixture`) — a small SPA with shadow DOM/iframe/nav cases used for capture & walkthrough development and Playwright tests.
 
@@ -52,7 +54,7 @@ wayline/
 ├─ packages/
 │  ├─ shared-types/     # Zod schemas: Step, TargetDescriptor, events, entitlements
 │  ├─ ui/               # tokens + shared shadcn components (dashboard ⇄ extension surfaces)
-│  └─ config/           # eslint, tsconfig, prettier presets
+│  └─ config/           # env validation (createEnv), env-fragment schemas, stack-health checks
 ├─ infra/               # OpenTofu (see 07)
 ├─ docs/                # this documentation set
 ├─ docker-compose.yml
@@ -68,22 +70,23 @@ Rules:
 
 ## 4. Environment configuration
 
-- `packages/config` exports a Zod-validated `env.ts` per app — boot fails loudly on missing vars.
-- `.env.local` (gitignored) for local; ECS task-definition env + SSM `secrets` in AWS. Same variable names everywhere; only values differ (e.g. `S3_ENDPOINT`, `SQS_ENDPOINT`, `MAILER=smtp|ses`, `ASSET_URL_MODE=presign|cloudfront`).
+- `packages/config` exports a Zod-validated `env.ts` per app — boot fails loudly on missing vars. Shared enum fragments (`mailerModeSchema`, `assetUrlModeSchema`) compose into each app's schema via the `createEnv` helper so `MAILER`/`ASSET_URL_MODE` aren't hand-duplicated per app.
+- `.env.example` (root, committed) documents every variable and its local-stack default; copy to `.env.local` (gitignored) for local; ECS task-definition env + SSM `secrets` in AWS. Same variable names everywhere; only values differ (e.g. `S3_ENDPOINT`, `SQS_ENDPOINT`, `MAILER=smtp|ses`, `ASSET_URL_MODE=presign|cloudfront`).
 - Never commit secrets; `gitleaks` hook in CI.
 
 ## 5. Developer workflows
 
-| Task                       | Command                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------- |
-| Full stack up              | `docker compose up -d && pnpm dev`                                              |
-| DB migrate / new migration | `pnpm db:migrate` / `pnpm db:generate` (Drizzle Kit)                            |
-| Seed demo data             | `pnpm db:seed` (demo workspace, 2 flows, fake events)                           |
-| Unit tests                 | `pnpm test` (Vitest, affected-only via turbo)                                   |
-| E2E                        | `pnpm test:e2e` (Playwright: extension against `apps/fixture`; dashboard flows) |
-| Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)            |
-| Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                         |
-| Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                |
+| Task                       | Command                                                                                 |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| Full stack up              | `docker compose up -d && pnpm dev`                                                      |
+| Verify parity stack is up  | `pnpm stack:health` (checks postgres/elasticmq/minio/mailpit, exit 0 iff all reachable) |
+| DB migrate / new migration | `pnpm db:migrate` / `pnpm db:generate` (Drizzle Kit)                                    |
+| Seed demo data             | `pnpm db:seed` (demo workspace, 2 flows, fake events)                                   |
+| Unit tests                 | `pnpm test` (Vitest, affected-only via turbo)                                           |
+| E2E                        | `pnpm test:e2e` (Playwright: extension against `apps/fixture`; dashboard flows)         |
+| Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)                    |
+| Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                                 |
+| Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                        |
 
 ## 6. Quality gates (repo-wide, from Sprint 0)
 

@@ -14,7 +14,8 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:coverage": "turbo run test -- --coverage"
+    "test:coverage": "turbo run test -- --coverage",
+    "stack:health": "tsx packages/config/src/check-stack.cli.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
@@ -25,6 +26,7 @@
     "lefthook": "^1.8.5",
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
+    "tsx": "^4.19.2",
     "turbo": "^2.3.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.16.0",

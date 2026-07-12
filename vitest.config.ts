@@ -11,7 +11,17 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json-summary', 'html', 'lcov'],
       include: ['apps/*/src/**', 'packages/*/src/**'],
-      exclude: ['**/*.d.ts', '**/*.config.*', '**/dist/**', '**/*.test.*', '**/*.spec.*'],
+      exclude: [
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/dist/**',
+        '**/*.test.*',
+        '**/*.spec.*',
+        // Thin CLI entrypoints (console.log + exit code) — the branching they do add
+        // (e.g. exit-code-from-results) is verified manually per docs/08-local-dev.md §5,
+        // not coverage-gated.
+        '**/*.cli.ts',
+      ],
       thresholds: {
         lines: 95,
         branches: 95,
