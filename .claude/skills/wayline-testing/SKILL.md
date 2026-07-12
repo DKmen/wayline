@@ -30,7 +30,7 @@ Co-locate unit tests as `Module.test.ts(x)` next to source — no parallel `__te
 
 ## Coverage
 
-v8 provider, 95% thresholds (lines/branches/functions/statements). **CI is the authoritative full-repo gate**; `pre-push` (Lefthook) runs the same thresholds on affected packages only as a fast local backstop — not authoritative, don't mistake it for CI. Playwright is excluded from the coverage percentage entirely — CI pass/fail only, it has no real coverage concept to gate on.
+v8 provider, 95% thresholds (lines/branches/functions/statements). **CI is the authoritative full-repo gate**; `pre-push` (Lefthook) re-runs the same full-repo suite locally as a fast backstop — not authoritative, don't mistake it for CI. (`vitest.config.ts` is a single shared root config, not per-package, so there's no "affected packages only" to filter to — every invocation runs the whole suite regardless.) Playwright is excluded from the coverage percentage entirely — CI pass/fail only, it has no real coverage concept to gate on.
 
 ## Positive + negative discipline — honestly scoped
 

@@ -77,13 +77,15 @@ infra/
 
 ### Pipelines
 
-| Trigger                  | Pipeline                                                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| PR                       | Turborepo affected: lint, typecheck, unit tests, build; `tofu plan` if `infra/**`                                              |
-| main → api/worker        | build (native `ubuntu-24.04-arm` runners — no QEMU; `type=gha` cache, per-arch scope) → push ECR → **migration gate** → deploy |
-| main → dashboard/landing | build → S3 sync → CloudFront invalidation                                                                                      |
-| tag `ext-v*`             | build zip → `chrome-webstore-upload-cli` upload+publish → GitHub Release                                                       |
-| nightly                  | CWS token dry-run (keeps refresh token alive), dependency audit                                                                |
+| Trigger                  | Pipeline                                                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| PR                       | lint, typecheck, unit tests + 95% coverage, build, commitlint, gitleaks (required checks — see note below); `tofu plan` if `infra/**` |
+| main → api/worker        | build (native `ubuntu-24.04-arm` runners — no QEMU; `type=gha` cache, per-arch scope) → push ECR → **migration gate** → deploy        |
+| main → dashboard/landing | build → S3 sync → CloudFront invalidation                                                                                             |
+| tag `ext-v*`             | build zip → `chrome-webstore-upload-cli` upload+publish → GitHub Release                                                              |
+| nightly                  | CWS token dry-run (keeps refresh token alive), dependency audit                                                                       |
+
+**Implemented (WAYLI-22):** `.github/workflows/ci.yml` runs three required status checks on `main` (branch protection, `enforce_admins` on — no bypass, including for the repo owner): `quality` (lint, typecheck, `pnpm test:coverage`, build), `commitlint` (PR commits, against the existing `commitlint.config.cjs`), and `gitleaks` (secret scan, `gitleaks/gitleaks-action@v3` — no license key needed since this repo is under a personal GitHub account, not an organization). `quality` runs full-repo, not turbo `--filter` affected-only, as a deliberate simplification while the monorepo is two real packages — affected-only filtering stays the local pre-push fast-backstop; revisit if CI time becomes a real cost. Not yet wired: **e2e-smoke** (needs `apps/fixture` + Playwright, WAYLI-25) and the **API workspace-scope lint rule** (needs the real `scopedDb()` module, which doesn't exist until Sprint 1's `apps/api` build-out) — both deferred with the same reasoning as WAYLI-21's app-level env wiring. The capture-value-read-ban rule ([09-security-privacy.md §2](./09-security-privacy.md)) _is_ implemented, scoped to `apps/extension/**/lib/capture/**`.
 
 ### Migration gate (before service deploy)
 

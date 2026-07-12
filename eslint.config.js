@@ -53,4 +53,24 @@ export default tseslint.config(
       'react/no-multi-comp': ['error', { ignoreStateless: true }],
     },
   },
+  {
+    // Capture code may read element metadata only, never typed values (docs/09-security-privacy.md §2) —
+    // a captured `.value`/`.textContent` could carry sensitive user input into a stored step.
+    files: ['apps/extension/**/lib/capture/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "MemberExpression[property.name='value']",
+          message:
+            'Capture code must read element metadata only, never form-control values (docs/09-security-privacy.md §2) — remove this `.value` read.',
+        },
+        {
+          selector: "MemberExpression[property.name='textContent']",
+          message:
+            'Capture code must read element metadata only, never rendered text (docs/09-security-privacy.md §2) — remove this `.textContent` read.',
+        },
+      ],
+    },
+  },
 );
