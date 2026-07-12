@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Wayline Workflow'
+  short_description: 'Deliver Wayline Plane tickets consistently.'
+  default_prompt: 'Use $wayline-workflow to pick up and complete the next startable Wayline ticket.'
