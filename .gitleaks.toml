@@ -1,0 +1,9 @@
+# Extends gitleaks' default ruleset (~100+ rules) rather than replacing it.
+[extend]
+useDefault = true
+
+[allowlist]
+# WAYLI-22's own CI-gate proof (see PR history) used this fabricated AWS-shaped key to
+# verify gitleaks actually fires — never a real credential, and deleting the fixture file
+# doesn't remove it from git history, so it needs an explicit, exact-value allowlist entry.
+regexes = ['''AKIAQZRPMDXXVNJHK3WY''']
