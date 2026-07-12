@@ -66,7 +66,7 @@ Rules:
 
 - `packages/shared-types` is the single source of truth for wire shapes; API validates with the same Zod schemas the clients import. No hand-duplicated types.
 - Node 22 pinned via `.nvmrc` + `engines`; pnpm via corepack.
-- Turborepo tasks: `build`, `dev`, `lint`, `typecheck`, `test`, `test:e2e`; remote caching optional later.
+- Turborepo tasks: `build`, `dev`, `lint`, `typecheck`, `test:e2e`; remote caching optional later. `test`/`test:coverage` deliberately bypass turbo — one shared root Vitest config (WAYLI-22), not per-package.
 
 ## 4. Environment configuration
 
@@ -76,18 +76,18 @@ Rules:
 
 ## 5. Developer workflows
 
-| Task                       | Command                                                                                                                                                                        |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Full stack up              | `docker compose up -d && pnpm dev`                                                                                                                                             |
-| Verify parity stack is up  | `pnpm stack:health` (checks postgres/elasticmq/minio/mailpit, exit 0 iff all reachable)                                                                                        |
-| DB migrate / new migration | `pnpm db:migrate` / `pnpm db:generate` (Drizzle Kit)                                                                                                                           |
-| Seed demo data             | `pnpm db:seed` (demo workspace, 2 flows, fake events)                                                                                                                          |
-| Unit tests                 | `pnpm test` (Vitest, full-repo — one shared root config, not per-package)                                                                                                      |
-| Storybook (`packages/ui`)  | `pnpm --filter @wayline/ui dev` (one-time setup: `npx playwright install chromium`, needed for `pnpm --filter @wayline/ui test:storybook`'s real-browser a11y/contrast checks) |
-| E2E                        | `pnpm test:e2e` (Playwright: extension against `apps/fixture`; dashboard flows)                                                                                                |
-| Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)                                                                                                           |
-| Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                                                                                                                        |
-| Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                                                                                                               |
+| Task                       | Command                                                                                                                                                                             |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Full stack up              | `docker compose up -d && pnpm dev`                                                                                                                                                  |
+| Verify parity stack is up  | `pnpm stack:health` (checks postgres/elasticmq/minio/mailpit, exit 0 iff all reachable)                                                                                             |
+| DB migrate / new migration | `pnpm db:migrate` / `pnpm db:generate` (Drizzle Kit)                                                                                                                                |
+| Seed demo data             | `pnpm db:seed` (demo workspace, 2 flows, fake events)                                                                                                                               |
+| Unit tests                 | `pnpm test` (Vitest, full-repo — one shared root config, not per-package)                                                                                                           |
+| Storybook (`packages/ui`)  | `pnpm --filter @wayline/ui dev` (one-time setup: `npx playwright install chromium`, needed for `pnpm --filter @wayline/ui test:storybook`'s real-browser a11y/contrast checks)      |
+| E2E                        | `pnpm test:e2e` (Playwright, `@wayline/fixture` — currently the fixture's own pages only; extension-loaded + dashboard-flow suites are Sprint 1+/2 additions once those apps exist) |
+| Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)                                                                                                                |
+| Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                                                                                                                             |
+| Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                                                                                                                    |
 
 ## 6. Quality gates (repo-wide, from Sprint 0)
 
