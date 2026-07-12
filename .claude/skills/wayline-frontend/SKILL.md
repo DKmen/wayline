@@ -31,7 +31,7 @@ Never hardcode hex/colors in component files — consume Tailwind v4 `@theme` OK
 
 ## shadcn/ui vs. custom identity components (docs/05 §2)
 
-shadcn primitives (Button, Input, Dialog, DropdownMenu, Tooltip, Tabs, Badge, Table, Toast, Avatar, Skeleton, Command) come from shadcn — don't hand-roll them. The product's visual identity lives in its custom components: `FlowCard`, `Filmstrip`, `StepCanvas`, `RedactionPanel`, `RecordingPill`, `SpotlightOverlay`, `WalkthroughBar`, `PauseCard`, `VideoPlayer`, `OnboardingChecklist`, `PlanUsageMeter`. Build these in `packages/ui`'s Storybook first and screenshot-review against the design PDF (`docs/App workflow and design specification.pdf`) before wiring into a screen (docs/05 §5).
+shadcn primitives (Button, Input, Dialog, DropdownMenu, Tooltip, Tabs, Badge, Table, Toast, Avatar, Skeleton, Command) come from shadcn — don't hand-roll them. **Only Button, Input, Badge, and Tooltip exist yet** (WAYLI-24, Radix backend, `radix-nova` style) — the rest are added per-screen starting Sprint 1, the same build-as-needed way the custom components below are. The product's visual identity lives in its custom components: `FlowCard`, `Filmstrip`, `StepCanvas`, `RedactionPanel`, `RecordingPill`, `SpotlightOverlay`, `WalkthroughBar`, `PauseCard`, `VideoPlayer`, `OnboardingChecklist`, `PlanUsageMeter`. Build these in `packages/ui`'s Storybook first and screenshot-review against the design PDF (`docs/App workflow and design specification.pdf`) before wiring into a screen (docs/05 §5).
 
 ## TanStack Query vs. local state — decision rule
 

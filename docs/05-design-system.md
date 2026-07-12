@@ -13,10 +13,12 @@ Source of truth for visual direction: `App workflow and design specification.pdf
 | Success      | `#1E7F4F` _(derived — verify against PDF renders)_ | Published, completed                                        |
 | Danger       | `#C2402A` _(derived)_                              | Destructive, render failure                                 |
 
-- **Type**: Instrument Sans (Google Fonts) — headings 600, body 400/500; mono (JetBrains Mono) for URLs/selectors in the editor inspector.
+- **Type**: Instrument Sans (self-hosted via `@fontsource`, not a Google Fonts CDN call — matches the product's privacy-forward posture of no third-party asset requests) — headings 600, body 400/500; mono (JetBrains Mono) for URLs/selectors in the editor inspector.
 - **Voice**: calm, plain, privacy-forward. Every privacy-relevant surface states the guarantee in-line ("Typed values are never captured · everything stays on this device until you publish" — verbatim from PDF 2c).
 - **Tagline**: _Every workflow, one line to follow._
 - Implementation: Tailwind v4 `@theme` OKLCH tokens in `packages/ui`, consumed by dashboard, extension (side panel/popup/overlay via shadow root), and landing. Light theme first; dark theme is a token swap later.
+- **Derived values pending PDF verification** (WAYLI-24): neutral scale (`--secondary`/`--muted`/`--accent`/`--border`/`--input`), `--radius`, and `--warning-foreground` aren't specified in this doc and were derived the same way success/danger already are above.
+- **Known WCAG AA gap** (WAYLI-24, real contrast math, not eyeballed): amber fails AA at normal text size in every tested combination (3.49–3.74:1 vs 4.5:1 needed); way-blue as text/link color on the mist background fails narrowly (4.46:1 vs 4.5:1). Brand colors are kept exactly as approved rather than redesigned — amber is restricted to large-text/icon/border contexts and always paired with a non-color signifier, per the accessibility rule below.
 
 ## 2. Component inventory (shadcn/ui base + custom)
 

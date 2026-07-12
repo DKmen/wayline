@@ -1,0 +1,102 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import './fonts.css';
+
+/*
+ * Brand tokens computed from docs/05-design-system.md's approved hex values via the
+ * real sRGB→OKLab→OKLCH conversion (not eyeballed). Neutral scale, --radius, and
+ * warning-foreground are derived (docs/05 already flags success/danger the same way —
+ * "derived — verify against PDF renders") pending a PDF density pass.
+ *
+ * Known WCAG AA gaps in the approved brand colors (kept as-is, not redesigned here):
+ * amber fails AA at normal text size in every combination tested (3.49-3.74:1 vs 4.5:1
+ * needed); way-blue as text on the mist background fails narrowly (4.46:1 vs 4.5:1).
+ * Mitigation per docs/05 §4 ("any state conveyed by color needs a non-color signifier
+ * too"): amber is restricted to large-text/icon/border contexts, never small solid-fill
+ * body text, and is always paired with an icon or label — never color alone. These two
+ * gaps are accepted as-is (real, PDF-approved brand colors) — see Button.stories.tsx /
+ * Badge.stories.tsx's `a11y.test: 'todo'` overrides on the specific affected stories.
+ *
+ * Danger red, by contrast, is a *derived* placeholder (never itself PDF-approved), so
+ * when the real-browser a11y tier measured shadcn's default destructive/10-tint pattern
+ * at 4.2:1 (real, browser-measured, not estimated), it was darkened from L=0.554 to
+ * L=0.51 (oklch→sRGB computed, see docs/05's "derived" note) — 5.08:1, a real margin
+ * above the 4.5:1 floor rather than a razor-thin pass.
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --radius: 0.625rem; /* derived — verify against PDF density */
+
+  --background: oklch(0.976 0.003 264.54); /* --mist #F6F7F9 */
+  --foreground: oklch(0.248 0.029 253.07); /* --ink #17222F */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.248 0.029 253.07);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.248 0.029 253.07);
+
+  --primary: oklch(0.559 0.179 259.4); /* --way-blue #2A6FDB */
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.94 0.006 253.07); /* derived neutral */
+  --secondary-foreground: oklch(0.248 0.029 253.07);
+  --muted: oklch(0.94 0.006 253.07); /* derived neutral */
+  --muted-foreground: oklch(0.45 0.02 253.07); /* derived neutral */
+  --accent: oklch(0.94 0.006 253.07); /* derived neutral */
+  --accent-foreground: oklch(0.248 0.029 253.07);
+
+  --destructive: oklch(0.51 0.17 32.08); /* darkened from danger #C2402A for AA — see note above */
+  --success: oklch(0.53 0.116 156.44); /* success #1E7F4F, derived */
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.62 0.133 68.9); /* --amber #B9750B */
+  --warning-foreground: oklch(
+    0.248 0.029 253.07
+  ); /* ink — see WCAG note above: large-text/icon use only */
+
+  --border: oklch(0.89 0.007 253.07); /* derived neutral */
+  --input: oklch(0.89 0.007 253.07); /* derived neutral */
+  --ring: oklch(0.559 0.179 259.4 / 0.5); /* way-blue at 50% alpha */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}

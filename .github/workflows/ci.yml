@@ -29,7 +29,14 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm run typecheck:scripts
       - run: pnpm run verify:lint-rules
+      - run: pnpm run verify:no-hardcoded-colors
       - run: pnpm test:coverage
+      - name: Install Playwright Chromium
+        # playwright is a packages/ui-local devDependency, not root's — must run scoped
+        # to that package so pnpm resolves its own node_modules/.bin, not root's.
+        run: pnpm --filter @wayline/ui exec playwright install --with-deps chromium
+      - name: Storybook a11y/contrast tier (not coverage-gated — real-browser only)
+        run: pnpm --filter @wayline/ui test:storybook
       - run: pnpm build
 
   commitlint:
