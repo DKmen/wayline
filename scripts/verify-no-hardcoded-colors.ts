@@ -14,6 +14,13 @@ const COMPLIANT_CODE = `export function GoodCard() {
 }
 `;
 
+// Ordinary copy that happens to contain a hex-shaped substring — must NOT be flagged,
+// since the rule targets color usage, not any string containing hex-valid characters.
+const FALSE_POSITIVE_CODE = `export function TicketRef() {
+  return <span title="Ref #123abc in a ticket">#123abc</span>;
+}
+`;
+
 interface Check {
   name: string;
   ok: boolean;
@@ -31,10 +38,15 @@ async function main(): Promise<void> {
 
   const violatingCount = await ruleMessageCount(eslint, VIOLATING_CODE);
   const compliantCount = await ruleMessageCount(eslint, COMPLIANT_CODE);
+  const falsePositiveCount = await ruleMessageCount(eslint, FALSE_POSITIVE_CODE);
 
   const checks: Check[] = [
     { name: 'flags a hardcoded hex color in a component file', ok: violatingCount === 1 },
     { name: 'stays silent on theme-token class names', ok: compliantCount === 0 },
+    {
+      name: 'stays silent on ordinary copy containing hex-shaped text',
+      ok: falsePositiveCount === 0,
+    },
   ];
 
   for (const check of checks) {

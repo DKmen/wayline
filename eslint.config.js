@@ -97,12 +97,17 @@ export default tseslint.config(
       'no-restricted-syntax': [
         'error',
         {
-          selector: 'Literal[value=/#([0-9a-fA-F]{3}){1,2}\\b/]',
+          // Matches either an exact standalone hex literal (inline style values, e.g.
+          // `'#fff'`) or a Tailwind arbitrary-value bracketed form (`bg-[#fff]`) — NOT any
+          // hex-shaped substring anywhere in a string, which would false-positive on
+          // ordinary copy like `title="Ref #123abc"`.
+          selector: 'Literal[value=/^#([0-9a-fA-F]{3}){1,2}$|\\[#([0-9a-fA-F]{3}){1,2}\\]/]',
           message:
             'No hardcoded hex colors in component files — use a packages/ui theme token (bg-primary, text-foreground, etc.) instead (docs/05-design-system.md).',
         },
         {
-          selector: 'TemplateElement[value.raw=/#([0-9a-fA-F]{3}){1,2}\\b/]',
+          selector:
+            'TemplateElement[value.raw=/^#([0-9a-fA-F]{3}){1,2}$|\\[#([0-9a-fA-F]{3}){1,2}\\]/]',
           message:
             'No hardcoded hex colors in component files — use a packages/ui theme token (bg-primary, text-foreground, etc.) instead (docs/05-design-system.md).',
         },
