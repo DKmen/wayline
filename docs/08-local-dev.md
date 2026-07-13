@@ -88,6 +88,16 @@ Rules:
 | Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)                                                                                                                |
 | Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                                                                                                                             |
 | Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                                                                                                                    |
+| Sync Claude into Codex     | `$sync-context` in Codex, or `pnpm context:sync --for codex`                                                                                                                        |
+| Sync Codex into Claude     | `/sync-context` in Claude, or `pnpm context:sync --for claude`                                                                                                                      |
+
+### Cross-tool context synchronization
+
+Wayline configures project-scoped `SessionStart` hooks for Claude Code and Codex. On startup, resume, clear, or compaction, each tool reads the newest local transcript from the other tool whose recorded working directory belongs to this repository. The bridge injects at most six completed turns and 8,000 characters before the first model request; it does not make network or model calls.
+
+The bridge excludes system/developer messages, hidden reasoning, tool calls and results, attachments, metadata, sidechains, unfinished responses, and earlier hook payloads. It also masks common credential shapes before injection. Imported text is explicitly reference-only: quoted commands do not override the current request, `AGENTS.md`, or `CLAUDE.md`. Transcript parsing is defensive because local tool formats may change; missing or malformed records never block startup.
+
+Codex and Claude may request one-time approval when the checked-in hook definition changes. Review and trust the hook in each tool's hook UI. Runtime fingerprints live under `.git/agent-context-sync/`, so no transcript copy or sync state is committed. Use the manual commands above to inspect the selected source, message count, redaction count, and rendered handoff when troubleshooting.
 
 ## 6. Quality gates (repo-wide, from Sprint 0)
 
