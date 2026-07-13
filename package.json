@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "turbo run test:e2e",
+    "context:sync": "node scripts/context-sync/context-sync.cli.mjs",
     "stack:health": "tsx packages/config/src/check-stack.cli.ts",
     "verify:lint-rules": "tsx scripts/verify-security-lint-rules.ts",
     "verify:no-hardcoded-colors": "tsx scripts/verify-no-hardcoded-colors.ts",

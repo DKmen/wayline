@@ -1,5 +1,4 @@
 {
-  "enabledPlugins": {},
   "hooks": {
     "SessionStart": [
       {
@@ -7,9 +6,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/context-sync/context-sync.cli.mjs\" --for claude --hook",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/context-sync/context-sync.cli.mjs\" --for codex --hook",
             "timeout": 10,
-            "statusMessage": "Loading Codex context"
+            "statusMessage": "Loading Claude context"
           }
         ]
       }

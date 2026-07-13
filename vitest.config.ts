@@ -18,7 +18,11 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'node',
-          include: ['apps/*/src/**/*.test.{ts,tsx}', 'packages/*/src/**/*.test.{ts,tsx}'],
+          include: [
+            'apps/*/src/**/*.test.{ts,tsx}',
+            'packages/*/src/**/*.test.{ts,tsx}',
+            'scripts/**/*.test.mjs',
+          ],
           exclude: ['packages/ui/**'],
         },
       },
@@ -41,7 +45,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary', 'html', 'lcov'],
-      include: ['apps/*/src/**', 'packages/*/src/**'],
+      include: ['apps/*/src/**', 'packages/*/src/**', 'scripts/context-sync/**/*.mjs'],
       exclude: [
         '**/*.d.ts',
         '**/*.config.*',
@@ -52,6 +56,7 @@ export default defineConfig({
         // (e.g. exit-code-from-results) is verified manually per docs/08-local-dev.md §5,
         // not coverage-gated.
         '**/*.cli.ts',
+        '**/*.cli.mjs',
         // Storybook stories render components for visual/manual review (screenshots,
         // the real-browser a11y/contrast tier in vitest.storybook.config.ts) — they aren't
         // exercised by the jsdom unit-test tier and have no logic of their own to cover.
