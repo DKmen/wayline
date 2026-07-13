@@ -16,6 +16,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "turbo run test:e2e",
+    "db:generate": "pnpm --filter @wayline/api db:generate",
+    "db:migrate": "pnpm --filter @wayline/api db:migrate",
     "context:sync": "node scripts/context-sync/context-sync.cli.mjs",
     "stack:health": "tsx packages/config/src/check-stack.cli.ts",
     "verify:lint-rules": "tsx scripts/verify-security-lint-rules.ts",
