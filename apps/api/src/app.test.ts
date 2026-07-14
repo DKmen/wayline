@@ -12,7 +12,7 @@ async function buildTestApp() {
     baseURL: 'http://localhost:3000',
   });
 
-  return { app: createApp(auth), close };
+  return { app: createApp(auth, db), close };
 }
 
 describe('createApp', () => {

@@ -15,7 +15,7 @@ async function buildHarness() {
     }),
   };
   const auth = createAuth({ db, mailer, secret: 'a'.repeat(32), baseURL: 'http://localhost:3000' });
-  const app = createApp(auth);
+  const app = createApp(auth, db);
 
   return { app, db, sentMail, close };
 }
