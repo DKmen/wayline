@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createTestDb } from './db/test-client';
 import { createAuth } from './lib/auth';
 import { createApp } from './app';
-import { auditLog, session, workspaces } from './db/schema';
+import { auditLog, session, users, workspaces } from './db/schema';
 
 async function buildHarness() {
   const { db, close } = await createTestDb();
@@ -80,13 +80,25 @@ describe('workspace tenancy over HTTP (WAYLI-28 acceptance)', () => {
       const auditRows = await h.db.select().from(auditLog);
       expect(auditRows).toHaveLength(4);
 
-      // Positive: each owner lists their own members.
+      // Positive: each owner lists their own members. Magic-link users have no name, so
+      // give owner A one — proving both the null-name fallback (owner B) and the real-name
+      // path serialize correctly.
+      await h.db
+        .update(users)
+        .set({ name: 'Owner A' })
+        .where(eq(users.email, 'owner-a@example.com'));
       const ownRes = await h.listMembers(cookieA, wsA.id);
       expect(ownRes.status).toBe(200);
-      const ownBody = (await ownRes.json()) as { members: { email: string; role: string }[] };
+      const ownBody = (await ownRes.json()) as {
+        members: { email: string; role: string; name: string }[];
+      };
       expect(ownBody.members).toEqual([
-        expect.objectContaining({ email: 'owner-a@example.com', role: 'admin' }),
+        expect.objectContaining({ email: 'owner-a@example.com', role: 'admin', name: 'Owner A' }),
       ]);
+
+      const ownResB = await h.listMembers(cookieB, wsB.id);
+      const ownBodyB = (await ownResB.json()) as { members: { name: string }[] };
+      expect(ownBodyB.members).toEqual([expect.objectContaining({ name: '' })]);
 
       // The ticket's headline: cross-workspace reads are 403 in both directions.
       const crossAtoB = await h.listMembers(cookieA, wsB.id);
@@ -153,6 +165,14 @@ describe('workspace tenancy over HTTP (WAYLI-28 acceptance)', () => {
 
       const badBody = await h.createWorkspace(cookie, { name: '', slug: 'UPPER CASE' });
       expect(badBody.status).toBe(400);
+
+      // A body that isn't JSON at all must also 400, not 500.
+      const notJson = await h.app.request('/v1/workspaces', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', cookie },
+        body: 'not json at all',
+      });
+      expect(notJson.status).toBe(400);
     } finally {
       await h.close();
     }

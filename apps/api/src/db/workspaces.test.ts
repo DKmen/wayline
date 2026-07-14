@@ -33,6 +33,26 @@ describe('createWorkspaceWithAdmin', () => {
     }
   });
 
+  it('rethrows a non-uniqueness failure untouched (FK violation is not a 409)', async () => {
+    const { db, close } = await createTestDb();
+
+    try {
+      // No users seeded: the member insert violates its user FK, which must NOT be
+      // translated into a client-facing ConflictError.
+      const attempt = createWorkspaceWithAdmin(db, {
+        name: 'Acme',
+        slug: 'acme',
+        userId: 'ghost_user',
+      });
+
+      await expect(attempt).rejects.toThrow();
+      await expect(attempt).rejects.not.toBeInstanceOf(ConflictError);
+      expect(await db.select().from(workspaces)).toHaveLength(0);
+    } finally {
+      await close();
+    }
+  });
+
   it('throws ConflictError on a duplicate slug and rolls back every row', async () => {
     const { db, close } = await createTestDb();
 
