@@ -76,6 +76,58 @@ export async function createTestDb(): Promise<{
       created_at timestamptz NOT NULL DEFAULT now()
     );
   `);
+  await db.execute(sql`CREATE TYPE workspace_plan AS ENUM ('free', 'pro', 'team');`);
+  await db.execute(sql`CREATE TYPE workspace_role AS ENUM ('viewer', 'creator', 'admin');`);
+  await db.execute(sql`
+    CREATE TABLE workspaces (
+      id uuid PRIMARY KEY,
+      name text NOT NULL,
+      slug citext NOT NULL UNIQUE,
+      plan workspace_plan NOT NULL DEFAULT 'free',
+      deleted_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    );
+  `);
+  await db.execute(sql`
+    CREATE TABLE workspace_members (
+      workspace_id uuid NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+      user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      role workspace_role NOT NULL,
+      last_active_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (workspace_id, user_id)
+    );
+  `);
+  await db.execute(sql`CREATE INDEX workspace_members_user_id_idx ON workspace_members (user_id);`);
+  await db.execute(sql`
+    CREATE TABLE invitations (
+      id uuid PRIMARY KEY,
+      workspace_id uuid NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+      email citext NOT NULL,
+      role workspace_role NOT NULL,
+      invited_by text REFERENCES users(id) ON DELETE SET NULL,
+      token_hash text NOT NULL UNIQUE,
+      expires_at timestamptz NOT NULL,
+      accepted_at timestamptz,
+      revoked_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    );
+  `);
+  await db.execute(sql`
+    CREATE TABLE audit_log (
+      id uuid PRIMARY KEY,
+      workspace_id uuid NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+      actor_id text REFERENCES users(id) ON DELETE SET NULL,
+      action text NOT NULL,
+      target_type text NOT NULL,
+      target_id text,
+      meta jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+  `);
 
   return { db, close: () => client.close() };
 }

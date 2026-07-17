@@ -114,4 +114,21 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Route handlers never touch a raw `db` — tenant access goes through the request
+    // context's scoped helper, non-tenant access through a src/db/ data-access function
+    // (docs/03-architecture.md §3.3). Static approximation only: the real guarantee is
+    // the cross-workspace integration suite plus the TENANT_TABLES schema-integrity test.
+    files: ['apps/api/src/routes/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "MemberExpression[object.name='db']",
+          message:
+            'Route handlers must not query `db` directly — use `workspaceCtx.scoped` for tenant tables or a src/db/ data-access function (docs/03-architecture.md §3.3).',
+        },
+      ],
+    },
+  },
 );
