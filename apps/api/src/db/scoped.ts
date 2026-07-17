@@ -48,9 +48,12 @@ export function scopedDb(executor: DbExecutor, workspaceId: string) {
       return executor.insert(table).values(stamped as InferInsertModel<T>[]);
     },
     update<T extends TenantTable>(table: T, set: ScopedUpdateSet<T>, where?: SQL) {
+      // Same runtime defense as insert: the Omit is compile-time only, so a loosely
+      // typed object smuggling workspaceId could otherwise re-home rows across tenants.
+      const { workspaceId: _ignored, ...safeSet } = set as Record<string, unknown>;
       return executor
         .update(table)
-        .set(set as PgUpdateSetSource<T>)
+        .set(safeSet as PgUpdateSetSource<T>)
         .where(and(eq(table.workspaceId, workspaceId), where));
     },
     delete<T extends TenantTable>(table: T, where?: SQL) {

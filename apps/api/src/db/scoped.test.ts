@@ -96,6 +96,27 @@ describe('scopedDb', () => {
     }
   });
 
+  it('update strips a smuggled workspaceId instead of re-homing rows across tenants', async () => {
+    const { db, close } = await createTestDb();
+
+    try {
+      const { wsA, wsB } = await seedTwoWorkspaces(db);
+      await scopedDb(db, wsA.id).update(workspaceMembers, {
+        // A compile-time Omit can't stop a spread at runtime — prove the strip.
+        ...({ workspaceId: wsB.id } as object),
+        role: 'viewer',
+      });
+
+      const rows = await db.select().from(workspaceMembers);
+      const rowA = rows.find((row) => row.userId === 'user_a');
+      const rowB = rows.find((row) => row.userId === 'user_b');
+      expect(rowA).toMatchObject({ workspaceId: wsA.id, role: 'viewer' });
+      expect(rowB).toMatchObject({ workspaceId: wsB.id, role: 'admin' });
+    } finally {
+      await close();
+    }
+  });
+
   it('delete removes only the scoped workspace rows', async () => {
     const { db, close } = await createTestDb();
 
