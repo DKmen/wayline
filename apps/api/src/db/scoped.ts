@@ -20,7 +20,7 @@ export type TenantTable = PgTable & { workspaceId: AnyPgColumn };
 type ScopedInsertValues<T extends PgTable> =
   InferInsertModel<T> extends infer M ? Omit<M, 'workspaceId'> : never;
 type ScopedUpdateSet<T extends PgTable> =
-  InferInsertModel<T> extends infer M ? Omit<Partial<M>, 'workspaceId'> : never;
+  PgUpdateSetSource<T> extends infer M ? Omit<M, 'workspaceId'> : never;
 
 /**
  * Registry of every tenant-owned table; the schema-integrity test asserts it matches

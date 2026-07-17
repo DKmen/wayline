@@ -8,7 +8,9 @@ export const invitationSchema = z
     workspaceId: z.string().uuid(),
     email: z.string().email(),
     role: roleSchema,
-    invitedBy: z.string().min(1),
+    // Nullable: the invitation survives the inviter's account deletion (invited_by is
+    // ON DELETE SET NULL, matching audit-event's actorId retention rationale).
+    invitedBy: z.string().min(1).nullable(),
     expiresAt: z.string().datetime(),
     acceptedAt: z.string().datetime().nullable(),
     revokedAt: z.string().datetime().nullable(),

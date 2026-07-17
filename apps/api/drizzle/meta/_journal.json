@@ -15,6 +15,13 @@
       "when": 1784009195208,
       "tag": "0001_conscious_bucky",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784310785010,
+      "tag": "0002_secret_xavin",
+      "breakpoints": true
     }
   ]
 }

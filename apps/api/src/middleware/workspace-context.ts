@@ -22,13 +22,10 @@ export function workspaceContext(db: DbExecutor) {
     const membership = await findMembershipWithWorkspace(db, workspaceId, user.id);
     if (!membership) throw new ForbiddenError();
 
-    c.set('workspaceCtx', {
-      workspace: membership.workspace,
-      role: membership.role,
-      scoped: scopedDb(db, workspaceId),
-    });
+    const scoped = scopedDb(db, workspaceId);
+    c.set('workspaceCtx', { workspace: membership.workspace, role: membership.role, scoped });
 
-    await touchLastActiveAt(db, workspaceId, user.id);
+    await touchLastActiveAt(scoped, user.id);
     await next();
   });
 }

@@ -1,5 +1,5 @@
 import { and, eq, isNull, lt, or, sql } from 'drizzle-orm';
-import type { DbExecutor } from './scoped';
+import type { DbExecutor, ScopedDb } from './scoped';
 import { users, workspaceMembers, workspaces } from './schema';
 
 /** Only bump last_active_at when it's stale — docs/04 §2 mandates a throttled write, not one per request. */
@@ -40,19 +40,17 @@ export async function findMembershipWithWorkspace(
 }
 
 /** Bumps the member's last_active_at if it's null or older than the throttle window. */
-export async function touchLastActiveAt(db: DbExecutor, workspaceId: string, userId: string) {
+export async function touchLastActiveAt(scoped: ScopedDb, userId: string) {
   const staleBefore = new Date(Date.now() - LAST_ACTIVE_THROTTLE_MS);
 
-  await db
-    .update(workspaceMembers)
-    .set({ lastActiveAt: sql`now()` })
-    .where(
-      and(
-        eq(workspaceMembers.workspaceId, workspaceId),
-        eq(workspaceMembers.userId, userId),
-        or(isNull(workspaceMembers.lastActiveAt), lt(workspaceMembers.lastActiveAt, staleBefore)),
-      ),
-    );
+  await scoped.update(
+    workspaceMembers,
+    { lastActiveAt: sql`now()` },
+    and(
+      eq(workspaceMembers.userId, userId),
+      or(isNull(workspaceMembers.lastActiveAt), lt(workspaceMembers.lastActiveAt, staleBefore)),
+    ),
+  );
 }
 
 /**

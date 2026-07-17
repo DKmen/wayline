@@ -6,6 +6,7 @@ import {
   touchLastActiveAt,
 } from './memberships';
 import { users, workspaceMembers, workspaces } from './schema';
+import { scopedDb } from './scoped';
 import { createTestDb } from './test-client';
 
 type TestDb = Awaited<ReturnType<typeof createTestDb>>['db'];
@@ -73,15 +74,16 @@ describe('touchLastActiveAt', () => {
 
     try {
       const { wsA } = await seed(db);
+      const scoped = scopedDb(db, wsA.id);
 
-      await touchLastActiveAt(db, wsA.id, 'user_a');
+      await touchLastActiveAt(scoped, 'user_a');
       const [afterFirst] = await db
         .select()
         .from(workspaceMembers)
         .where(eq(workspaceMembers.userId, 'user_a'));
       expect(afterFirst!.lastActiveAt).toBeInstanceOf(Date);
 
-      await touchLastActiveAt(db, wsA.id, 'user_a');
+      await touchLastActiveAt(scoped, 'user_a');
       const [afterSecond] = await db
         .select()
         .from(workspaceMembers)
@@ -103,7 +105,7 @@ describe('touchLastActiveAt', () => {
         .set({ lastActiveAt: stale })
         .where(eq(workspaceMembers.userId, 'user_a'));
 
-      await touchLastActiveAt(db, wsA.id, 'user_a');
+      await touchLastActiveAt(scopedDb(db, wsA.id), 'user_a');
 
       const [row] = await db
         .select()

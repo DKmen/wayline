@@ -14,9 +14,10 @@ export const invitations = pgTable('invitations', {
     .references(() => workspaces.id, { onDelete: 'cascade' }),
   email: citext('email').notNull(),
   role: workspaceRoleEnum('role').notNull(),
-  invitedBy: text('invited_by')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
+  // Nullable + SET NULL, matching audit_log.actor_id: an invitation must survive the
+  // inviter's account deletion rather than silently vanishing (and taking its audit
+  // trail with it) via an unintended cascade.
+  invitedBy: text('invited_by').references(() => users.id, { onDelete: 'set null' }),
   // Only the hash is stored (docs/09-security-privacy.md §3) — the raw token goes out in the invite email.
   tokenHash: text('token_hash').notNull().unique(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),

@@ -107,7 +107,7 @@ export async function createTestDb(): Promise<{
       workspace_id uuid NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
       email citext NOT NULL,
       role workspace_role NOT NULL,
-      invited_by text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      invited_by text REFERENCES users(id) ON DELETE SET NULL,
       token_hash text NOT NULL UNIQUE,
       expires_at timestamptz NOT NULL,
       accepted_at timestamptz,

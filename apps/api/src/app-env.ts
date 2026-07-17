@@ -1,4 +1,4 @@
-import type { Role } from '@wayline/shared-types';
+import type { Role, Workspace } from '@wayline/shared-types';
 import type { createAuth } from './lib/auth';
 import type { ScopedDb } from './db/scoped';
 
@@ -9,7 +9,7 @@ export type SessionUser = Auth['$Infer']['Session']['user'];
 
 /** Per-request tenancy context (docs/03-architecture.md §3.3) — resolved once by workspaceContext middleware. */
 export type WorkspaceContext = {
-  workspace: { id: string; name: string; slug: string; plan: string };
+  workspace: Workspace;
   role: Role;
   scoped: ScopedDb;
 };

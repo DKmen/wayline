@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 import { createTestDb } from '../test-client';
 import { invitations } from './invitations';
@@ -51,6 +52,30 @@ describe('invitations schema', () => {
       await expect(
         db.insert(invitations).values({ ...base, email: 'b@example.com' }),
       ).rejects.toThrow();
+    } finally {
+      await close();
+    }
+  });
+
+  it('keeps the invitation with a null inviter when the inviting user is deleted (survives account deletion)', async () => {
+    const { db, close } = await createTestDb();
+
+    try {
+      const ws = await seed(db);
+      await db.insert(invitations).values({
+        workspaceId: ws.id,
+        email: 'invitee@example.com',
+        role: 'creator',
+        invitedBy: 'user_1',
+        tokenHash: 'hash_1',
+        expiresAt: new Date('2026-07-21T00:00:00Z'),
+      });
+
+      await db.delete(users).where(eq(users.id, 'user_1'));
+
+      const [invite] = await db.select().from(invitations);
+      expect(invite).toBeDefined();
+      expect(invite!.invitedBy).toBeNull();
     } finally {
       await close();
     }

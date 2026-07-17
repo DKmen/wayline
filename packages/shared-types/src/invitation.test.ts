@@ -19,6 +19,11 @@ describe('invitationSchema', () => {
     expect(invitationSchema.parse(accepted)).toEqual(accepted);
   });
 
+  it('accepts a null invitedBy (inviter account was deleted)', () => {
+    const orphaned = { ...valid, invitedBy: null };
+    expect(invitationSchema.parse(orphaned)).toEqual(orphaned);
+  });
+
   it('rejects bad email, non-datetime expiry, and unknown keys', () => {
     expect(() => invitationSchema.parse({ ...valid, email: 'nope' })).toThrowError();
     expect(() => invitationSchema.parse({ ...valid, expiresAt: 'tomorrow' })).toThrowError();
