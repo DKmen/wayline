@@ -23,7 +23,7 @@ export default defineConfig({
             'packages/*/src/**/*.test.{ts,tsx}',
             'scripts/**/*.test.mjs',
           ],
-          exclude: ['packages/ui/**'],
+          exclude: ['packages/ui/**', 'apps/dashboard/**'],
         },
       },
       {
@@ -39,6 +39,21 @@ export default defineConfig({
           environment: 'jsdom',
           include: ['packages/ui/src/**/*.test.{ts,tsx}'],
           setupFiles: ['./packages/ui/vitest-setup.ts'],
+        },
+      },
+      {
+        extends: true,
+        // apps/dashboard consumes @wayline/ui's raw TS source directly (no build step),
+        // whose own components import from its "@/*" alias — same resolution need as
+        // the "ui" project above, just pointed at a different consumer.
+        resolve: {
+          alias: { '@': fileURLToPath(new URL('./packages/ui/src', import.meta.url)) },
+        },
+        test: {
+          name: 'dashboard',
+          environment: 'jsdom',
+          include: ['apps/dashboard/src/**/*.test.{ts,tsx}'],
+          setupFiles: ['./apps/dashboard/vitest-setup.ts'],
         },
       },
     ],
@@ -67,6 +82,12 @@ export default defineConfig({
         // coverage.include (above) force-includes unimported files, so without this every
         // fixture source file would count as 0%-covered dead weight against the threshold.
         'apps/fixture/**',
+        // TanStack Router's generated route tree — mechanically produced by the router
+        // plugin from the routes/ tree, not hand-written logic to cover.
+        '**/routeTree.gen.ts',
+        // Thin bootstrap (createRoot + provider wiring) verified manually via `pnpm dev`,
+        // same rationale as the *.cli.ts exclusion above.
+        'apps/dashboard/src/main.tsx',
       ],
       thresholds: {
         lines: 95,

@@ -1,0 +1,5 @@
+@import '@wayline/ui/src/styles/theme.css';
+
+/* Tailwind v4 skips node_modules-symlinked workspace sources when scanning for classes
+   used inside @wayline/ui's own components — @source pulls them back into the scan. */
+@source '../../../../packages/ui/src';

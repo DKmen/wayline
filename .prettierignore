@@ -3,6 +3,7 @@ pnpm-workspace.yaml
 coverage
 dist
 .turbo
+**/routeTree.gen.ts
 
 # Third-party skill content (see .claude/skills/THIRD_PARTY_NOTICES.md) — kept
 # byte-identical to upstream so future updates diff cleanly; our own skills below
