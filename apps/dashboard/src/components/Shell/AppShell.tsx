@@ -22,11 +22,8 @@ export function AppShell() {
       <SkipLink />
       <header className="flex items-center justify-between border-b border-border px-4 py-3">
         <nav aria-label="Primary">
-          <Link
-            to="/"
-            className="font-medium text-foreground aria-[current=page]:text-primary"
-            activeProps={{ 'aria-current': 'page' }}
-          >
+          {/* TanStack Router stamps aria-current="page" on the active Link automatically. */}
+          <Link to="/" className="font-medium text-foreground aria-[current=page]:text-primary">
             Wayline
           </Link>
         </nav>
