@@ -98,9 +98,13 @@ jobs:
         # extra --, --grep is ignored; without it, the filter genuinely narrows the run.
         run: pnpm --filter @wayline/fixture test:e2e --grep @smoke
       - name: Install Playwright Chromium (dashboard)
+        # if: always() — a fixture e2e failure must not silently skip the dashboard suite;
+        # each app's e2e run is independent and both results should be visible.
+        if: always()
         # Separate devDependency install, same rationale as the fixture one above.
         run: pnpm --filter @wayline/dashboard exec playwright install --with-deps chromium
       - name: 'e2e smoke suite: dashboard (Playwright, not coverage-gated)'
+        if: always()
         run: pnpm --filter @wayline/dashboard test:e2e --grep @smoke
       - name: Upload Playwright HTML reports
         if: always()

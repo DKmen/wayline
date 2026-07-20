@@ -69,6 +69,20 @@ describe('protected route guard (real route tree)', () => {
     expect(await screen.findByLabelText('Email')).toBeInTheDocument();
   });
 
+  it('falls back to the shell instead of an off-site redirect for a malicious ?redirect=', async () => {
+    renderApp(
+      {
+        session: { expiresAt: '2026-08-01T00:00:00.000Z' },
+        user: { id: 'user_1', email: 'ada@example.com', name: 'Ada' },
+      },
+      '/sign-in?redirect=https%3A%2F%2Fevil.example.com%2Fphish',
+    );
+
+    // search validation collapses the non-same-origin value to undefined, so the
+    // already-signed-in bounce lands on the shell (/) — never on evil.example.com.
+    expect(await screen.findByText(/welcome, ada@example.com/i)).toBeInTheDocument();
+  });
+
   it('redirects mid-session once the session expires and the route re-validates', async () => {
     const { router, queryClient } = renderApp({
       session: { expiresAt: '2026-08-01T00:00:00.000Z' },
