@@ -63,6 +63,12 @@ describe('protected route guard (real route tree)', () => {
     expect(await screen.findByText(/welcome, ada@example.com/i)).toBeInTheDocument();
   });
 
+  it('renders the sign-in form when no redirect search param is present', async () => {
+    renderApp(null, '/sign-in');
+
+    expect(await screen.findByLabelText('Email')).toBeInTheDocument();
+  });
+
   it('redirects mid-session once the session expires and the route re-validates', async () => {
     const { router, queryClient } = renderApp({
       session: { expiresAt: '2026-08-01T00:00:00.000Z' },

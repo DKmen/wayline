@@ -4,8 +4,13 @@ import { fetchJson } from '../../lib/api-client';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
+interface SignInFormProps {
+  /** Origin-relative path (e.g. from the sign-in route's `redirect` search param) the magic link should land on. */
+  callbackPath: string;
+}
+
 /** Magic-link request form — logo, one email input, no passwords (docs/05 §57). */
-export function SignInForm() {
+export function SignInForm({ callbackPath }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
 
@@ -16,7 +21,7 @@ export function SignInForm() {
     try {
       await fetchJson('/api/auth/sign-in/magic-link', {
         method: 'POST',
-        body: JSON.stringify({ email, callbackURL: `${window.location.origin}/` }),
+        body: JSON.stringify({ email, callbackURL: `${window.location.origin}${callbackPath}` }),
       });
       setStatus('sent');
     } catch {
