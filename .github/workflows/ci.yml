@@ -84,12 +84,12 @@ jobs:
           node-version-file: '.nvmrc'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Install Playwright Chromium
+      - name: Install Playwright Chromium (fixture)
         # @playwright/test is an apps/fixture-local devDependency, not root's — a separate
         # runner from `quality`'s own Playwright install (different job, different VM, no
         # shared browser cache), even though both pin the same Playwright version.
         run: pnpm --filter @wayline/fixture exec playwright install --with-deps chromium
-      - name: e2e smoke suite (Playwright, not coverage-gated)
+      - name: 'e2e smoke suite: fixture (Playwright, not coverage-gated)'
         # No extra `--` before --grep: `pnpm --filter <pkg> <script> -- <args>` forwards
         # everything after -- as one literal blob into the underlying `playwright test`
         # invocation, so Playwright's own CLI parser sees "-- --grep @smoke" and treats
@@ -97,10 +97,17 @@ jobs:
         # the full suite regardless of the tag filter. Confirmed via `--list`: with the
         # extra --, --grep is ignored; without it, the filter genuinely narrows the run.
         run: pnpm --filter @wayline/fixture test:e2e --grep @smoke
-      - name: Upload Playwright HTML report
+      - name: Install Playwright Chromium (dashboard)
+        # Separate devDependency install, same rationale as the fixture one above.
+        run: pnpm --filter @wayline/dashboard exec playwright install --with-deps chromium
+      - name: 'e2e smoke suite: dashboard (Playwright, not coverage-gated)'
+        run: pnpm --filter @wayline/dashboard test:e2e --grep @smoke
+      - name: Upload Playwright HTML reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
-          path: apps/fixture/playwright-report/
+          path: |
+            apps/fixture/playwright-report/
+            apps/dashboard/playwright-report/
           retention-days: 7

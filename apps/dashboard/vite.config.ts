@@ -5,7 +5,14 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [tanstackRouter({ routesDirectory: './src/routes' }), react(), tailwindcss()],
+  plugins: [
+    tanstackRouter({
+      routesDirectory: './src/routes',
+      routeFileIgnorePattern: '\\.test\\.tsx?$',
+    }),
+    react(),
+    tailwindcss(),
+  ],
   resolve: {
     // @wayline/ui ships raw TS source (no build step) whose own components import
     // from its "@/*" alias — resolve that alias here too so Vite can bundle them.
