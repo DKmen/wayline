@@ -6,6 +6,10 @@ allowBuilds:
   esbuild: true
   lefthook: true
 
+minimumReleaseAgeExclude:
+  - '@tanstack/router-generator@1.167.21'
+  - '@tanstack/router-plugin@1.168.22'
+
 onlyBuiltDependencies:
   - esbuild
   - lefthook

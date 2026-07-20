@@ -31,3 +31,11 @@ export type { Invitation } from './invitation';
 
 export { auditActionSchema, auditEventSchema } from './audit-event';
 export type { AuditAction, AuditEvent } from './audit-event';
+
+export {
+  magicLinkRequestSchema,
+  sessionInfoSchema,
+  sessionResponseSchema,
+  sessionUserSchema,
+} from './session';
+export type { MagicLinkRequest, SessionInfo, SessionResponse, SessionUser } from './session';

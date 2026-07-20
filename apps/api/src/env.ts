@@ -10,6 +10,7 @@ const schema = z.object({
   SMTP_FROM: z.string().min(1),
   BETTER_AUTH_SECRET: z.string().min(32),
   APP_URL: z.string().url(),
+  DASHBOARD_URL: z.string().url(),
 });
 
 /** Zod-validated process env for apps/api — boot fails loudly on a missing/invalid var. */

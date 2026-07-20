@@ -26,6 +26,10 @@ export function createAuth(deps: {
   mailer: Mailer;
   secret: string;
   baseURL: string;
+  // Origins Better Auth accepts for POST CSRF checks and magic-link callbackURL redirects
+  // (docs/03-architecture.md §3.2) — the dashboard origin must be listed or its sign-in POST
+  // is rejected. Defaults to just baseURL when omitted.
+  trustedOrigins?: string[];
 }) {
   // Better Auth's magic-link plugin only ever writes `emailVerified: true` (via
   // internalAdapter.createUser/updateUser); it never touches `emailVerifiedAt`. This
@@ -41,6 +45,11 @@ export function createAuth(deps: {
   return betterAuth({
     secret: deps.secret,
     baseURL: deps.baseURL,
+    ...(deps.trustedOrigins ? { trustedOrigins: deps.trustedOrigins } : {}),
+    // Better Auth auto-disables its origin/CSRF check whenever NODE_ENV === "test" —
+    // pin it on explicitly so trustedOrigins is always enforced, not dependent on an
+    // environment-variable heuristic (also makes the behavior testable deterministically).
+    advanced: { disableOriginCheck: false },
     database: drizzleAdapter(deps.db, {
       provider: 'pg',
       schema: {
