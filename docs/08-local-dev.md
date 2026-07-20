@@ -76,20 +76,20 @@ Rules:
 
 ## 5. Developer workflows
 
-| Task                       | Command                                                                                                                                                                             |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Full stack up              | `docker compose up -d && pnpm dev`                                                                                                                                                  |
-| Verify parity stack is up  | `pnpm stack:health` (checks postgres/elasticmq/minio/mailpit, exit 0 iff all reachable)                                                                                             |
-| DB migrate / new migration | `pnpm db:migrate` / `pnpm db:generate` (Drizzle Kit)                                                                                                                                |
-| Seed demo data             | `pnpm db:seed` (demo workspace, 2 flows, fake events)                                                                                                                               |
-| Unit tests                 | `pnpm test` (Vitest, full-repo — one shared root config, not per-package)                                                                                                           |
-| Storybook (`packages/ui`)  | `pnpm --filter @wayline/ui dev` (one-time setup: `npx playwright install chromium`, needed for `pnpm --filter @wayline/ui test:storybook`'s real-browser a11y/contrast checks)      |
-| E2E                        | `pnpm test:e2e` (Playwright, `@wayline/fixture` — currently the fixture's own pages only; extension-loaded + dashboard-flow suites are Sprint 1+/2 additions once those apps exist) |
-| Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)                                                                                                                |
-| Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                                                                                                                             |
-| Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                                                                                                                    |
-| Sync Claude into Codex     | `$sync-context` in Codex, or `pnpm context:sync --for codex`                                                                                                                        |
-| Sync Codex into Claude     | `/sync-context` in Claude, or `pnpm context:sync --for claude`                                                                                                                      |
+| Task                       | Command                                                                                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Full stack up              | `docker compose up -d && pnpm dev`                                                                                                                                             |
+| Verify parity stack is up  | `pnpm stack:health` (checks postgres/elasticmq/minio/mailpit, exit 0 iff all reachable)                                                                                        |
+| DB migrate / new migration | `pnpm db:migrate` / `pnpm db:generate` (Drizzle Kit)                                                                                                                           |
+| Seed demo data             | `pnpm db:seed` (demo workspace, 2 flows, fake events)                                                                                                                          |
+| Unit tests                 | `pnpm test` (Vitest, full-repo — one shared root config, not per-package)                                                                                                      |
+| Storybook (`packages/ui`)  | `pnpm --filter @wayline/ui dev` (one-time setup: `npx playwright install chromium`, needed for `pnpm --filter @wayline/ui test:storybook`'s real-browser a11y/contrast checks) |
+| E2E                        | `pnpm test:e2e` (Playwright, `@wayline/fixture` + `@wayline/dashboard`; extension-loaded suites are a later addition once that app exists)                                     |
+| Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)                                                                                                           |
+| Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                                                                                                                        |
+| Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                                                                                                               |
+| Sync Claude into Codex     | `$sync-context` in Codex, or `pnpm context:sync --for codex`                                                                                                                   |
+| Sync Codex into Claude     | `/sync-context` in Claude, or `pnpm context:sync --for claude`                                                                                                                 |
 
 ### Cross-tool context synchronization
 
@@ -98,6 +98,10 @@ Wayline configures project-scoped `SessionStart` hooks for Claude Code and Codex
 The bridge excludes system/developer messages, hidden reasoning, tool calls and results, attachments, metadata, sidechains, unfinished responses, and earlier hook payloads. It also masks common credential shapes before injection. Imported text is explicitly reference-only: quoted commands do not override the current request, `AGENTS.md`, or `CLAUDE.md`. Transcript parsing is defensive because local tool formats may change; missing or malformed records never block startup.
 
 Codex and Claude may request one-time approval when the checked-in hook definition changes. Review and trust the hook in each tool's hook UI. Runtime fingerprints live under `.git/agent-context-sync/`, so no transcript copy or sync state is committed. Use the manual commands above to inspect the selected source, message count, redaction count, and rendered handoff when troubleshooting.
+
+### Dashboard dev topology
+
+`apps/dashboard` (Vite, port 4400) proxies `/api` and `/v1` to `apps/api` (port 3000) via `server.proxy` in `vite.config.ts` — this makes every request same-origin in the browser, so Better Auth's default session cookie works with a plain `fetch` and no CORS configuration is needed in dev. The one API-side change this requires is `DASHBOARD_URL` (`.env.example`): Better Auth only accepts sign-in POSTs and magic-link callback redirects from an origin listed in `trustedOrigins`, which `apps/api` builds from this var. Production cross-subdomain deployment (a real CORS/cookie-domain setup) is Sprint 10 work — not needed while both apps share an origin through the dev proxy.
 
 ## 6. Quality gates (repo-wide, from Sprint 0)
 
