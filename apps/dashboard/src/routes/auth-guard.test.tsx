@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { sessionQueryOptions } from '../lib/session';
 import { routeTree } from '../routeTree.gen';
 
 afterEach(() => {
@@ -92,7 +93,7 @@ describe('protected route guard (real route tree)', () => {
 
     // Simulate the session expiring server-side: the next get-session call returns null.
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('null', { status: 200 })));
-    queryClient.removeQueries({ queryKey: ['session'] });
+    queryClient.removeQueries({ queryKey: sessionQueryOptions.queryKey });
     await router.invalidate();
 
     await waitFor(() => expect(screen.getByLabelText('Email')).toBeInTheDocument());

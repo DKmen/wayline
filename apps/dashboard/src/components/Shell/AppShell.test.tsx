@@ -40,7 +40,7 @@ function renderShell() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = buildRouter();
 
-  render(
+  return render(
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
@@ -85,17 +85,39 @@ describe('AppShell', () => {
     await waitFor(() => expect(screen.getByText('Sign-in content')).toBeInTheDocument());
   });
 
+  it('shows an alert and stays signed in when sign-out fails', async () => {
+    const sessionBody = JSON.stringify({
+      session: { expiresAt: '2026-08-01T00:00:00.000Z' },
+      user: { id: 'user_1', email: 'ada@example.com', name: 'Ada' },
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = typeof input === 'string' ? input : input.toString();
+        if (url.includes('/sign-out')) {
+          return Promise.resolve(new Response('', { status: 500 }));
+        }
+        return Promise.resolve(new Response(sessionBody, { status: 200 }));
+      }),
+    );
+
+    renderShell();
+
+    expect(await screen.findByText('ada@example.com')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/couldn't sign out/i);
+    expect(screen.getByText('Home content')).toBeInTheDocument();
+    expect(screen.getByText('ada@example.com')).toBeInTheDocument();
+  });
+
   it('has no accessibility violations', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(new Response(JSON.stringify(null), { status: 200 })),
     );
 
-    const { container } = render(
-      <QueryClientProvider client={new QueryClient()}>
-        <RouterProvider router={buildRouter()} />
-      </QueryClientProvider>,
-    );
+    const { container } = renderShell();
     await screen.findByText('Home content');
 
     expect(await axe(container)).toHaveNoViolations();
