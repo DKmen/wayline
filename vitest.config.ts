@@ -23,7 +23,7 @@ export default defineConfig({
             'packages/*/src/**/*.test.{ts,tsx}',
             'scripts/**/*.test.mjs',
           ],
-          exclude: ['packages/ui/**', 'apps/dashboard/**'],
+          exclude: ['packages/ui/**', 'apps/dashboard/**', 'apps/extension/src/**/*.test.tsx'],
         },
       },
       {
@@ -56,6 +56,17 @@ export default defineConfig({
           setupFiles: ['./apps/dashboard/vitest-setup.ts'],
         },
       },
+      {
+        extends: true,
+        test: {
+          name: 'extension',
+          environment: 'jsdom',
+          // Only .tsx (React component) tests need jsdom; plain .ts tests (isRestrictedUrl,
+          // background branching) stay in the "node" project.
+          include: ['apps/extension/src/**/*.test.tsx'],
+          setupFiles: ['./apps/extension/vitest-setup.ts'],
+        },
+      },
     ],
     coverage: {
       provider: 'v8',
@@ -67,6 +78,9 @@ export default defineConfig({
         '**/dist/**',
         '**/*.test.*',
         '**/*.spec.*',
+        // WXT entrypoint HTML shells (popup/sidepanel) — not JS, coverage.include's
+        // apps/*/src/** glob force-includes them; v8's coverage remapper can't parse HTML.
+        'apps/extension/src/entrypoints/**/*.html',
         // Thin CLI entrypoints (console.log + exit code) — the branching they do add
         // (e.g. exit-code-from-results) is verified manually per docs/08-local-dev.md §5,
         // not coverage-gated.
@@ -88,6 +102,11 @@ export default defineConfig({
         // Thin bootstrap (createRoot + provider wiring) verified manually via `pnpm dev`,
         // same rationale as the *.cli.ts exclusion above.
         'apps/dashboard/src/main.tsx',
+        'apps/extension/src/entrypoints/popup/main.tsx',
+        'apps/extension/src/entrypoints/sidepanel/main.tsx',
+        // Thin WXT plumbing (registers the runtime content-script's shadow-root mount) —
+        // verified by the Playwright build/load e2e test, not unit-testable in isolation.
+        'apps/extension/src/entrypoints/content.ts',
       ],
       thresholds: {
         lines: 95,

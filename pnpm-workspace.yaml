@@ -5,6 +5,7 @@ packages:
 allowBuilds:
   esbuild: true
   lefthook: true
+  spawn-sync: true
 
 minimumReleaseAgeExclude:
   - '@tanstack/router-generator@1.167.21'
@@ -13,3 +14,4 @@ minimumReleaseAgeExclude:
 onlyBuiltDependencies:
   - esbuild
   - lefthook
+  - spawn-sync
