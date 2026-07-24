@@ -1,4 +1,4 @@
-import { and, eq, isNull, lt, or, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, lt, or, sql } from 'drizzle-orm';
 import type { DbExecutor, ScopedDb } from './scoped';
 import { users, workspaceMembers, workspaces } from './schema';
 
@@ -37,6 +37,30 @@ export async function findMembershipWithWorkspace(
     );
 
   return row ?? null;
+}
+
+/**
+ * Every live workspace a user belongs to, with their role in each — the other sanctioned
+ * unscoped read alongside findMembershipWithWorkspace, scoped by user instead of workspace
+ * because it's the bootstrap query a workspace-scoped read doesn't exist to run yet.
+ * Ordered oldest-membership-first: there's no workspace-switcher UI yet, so this is the
+ * deterministic stand-in for "active workspace" until one exists.
+ */
+export async function listMembershipsForUser(db: DbExecutor, userId: string) {
+  return db
+    .select({
+      role: workspaceMembers.role,
+      workspace: {
+        id: workspaces.id,
+        name: workspaces.name,
+        slug: workspaces.slug,
+        plan: workspaces.plan,
+      },
+    })
+    .from(workspaceMembers)
+    .innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id))
+    .where(and(eq(workspaceMembers.userId, userId), isNull(workspaces.deletedAt)))
+    .orderBy(asc(workspaceMembers.createdAt));
 }
 
 /** Bumps the member's last_active_at if it's null or older than the throttle window. */

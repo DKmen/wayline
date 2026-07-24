@@ -17,6 +17,7 @@ describe('schema integrity (WAYLI-28 acceptance)', () => {
     expect(names).toEqual([
       'account',
       'audit_log',
+      'flows',
       'invitations',
       'rate_limit_attempts',
       'session',
@@ -38,7 +39,7 @@ describe('schema integrity (WAYLI-28 acceptance)', () => {
         const referencesUsersId =
           foreignTable === 'users' && ref.foreignColumns.every((col) => col.name === 'id');
         const touchesUserColumn = ref.columns.some((col) =>
-          ['user_id', 'invited_by', 'actor_id'].includes(col.name),
+          ['user_id', 'invited_by', 'actor_id', 'created_by'].includes(col.name),
         );
 
         if (touchesUserColumn) {
@@ -51,6 +52,7 @@ describe('schema integrity (WAYLI-28 acceptance)', () => {
     expect(identityFkColumns.sort()).toEqual([
       'account.user_id',
       'audit_log.actor_id',
+      'flows.created_by',
       'invitations.invited_by',
       'session.user_id',
       'workspace_members.user_id',

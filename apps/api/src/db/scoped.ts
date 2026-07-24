@@ -7,7 +7,7 @@ import type {
   PgUpdateSetSource,
 } from 'drizzle-orm/pg-core';
 import * as schema from './schema';
-import { auditLog, invitations, workspaceMembers } from './schema';
+import { auditLog, flows, invitations, workspaceMembers } from './schema';
 
 /** Any Drizzle Postgres database or transaction over the app schema — lets scoped ops compose with db.transaction(). */
 export type DbExecutor = PgDatabase<PgQueryResultHKT, typeof schema>;
@@ -26,7 +26,12 @@ type ScopedUpdateSet<T extends PgTable> =
  * Registry of every tenant-owned table; the schema-integrity test asserts it matches
  * the set of tables carrying a workspace_id column, so new tenant tables can't skip it.
  */
-export const TENANT_TABLES: readonly TenantTable[] = [auditLog, invitations, workspaceMembers];
+export const TENANT_TABLES: readonly TenantTable[] = [
+  auditLog,
+  flows,
+  invitations,
+  workspaceMembers,
+];
 
 /**
  * The only sanctioned way to touch a tenant-owned table (docs/03-architecture.md §3.3) —

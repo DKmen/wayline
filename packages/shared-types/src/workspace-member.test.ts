@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { memberListItemSchema, memberListResponseSchema, workspaceMemberSchema } from './index';
+import {
+  memberListItemSchema,
+  memberListResponseSchema,
+  myWorkspaceMembershipSchema,
+  myWorkspacesResponseSchema,
+  workspaceMemberSchema,
+} from './index';
 
 const workspaceId = '018f4f9e-7a3b-7c4d-9e1f-2a3b4c5d6e7f';
 
@@ -30,5 +36,25 @@ describe('memberListResponseSchema', () => {
   it('rejects a malformed email and missing members key', () => {
     expect(() => memberListItemSchema.parse({ ...item, email: 'not-an-email' })).toThrowError();
     expect(() => memberListResponseSchema.parse({})).toThrowError();
+  });
+});
+
+describe('myWorkspacesResponseSchema', () => {
+  const workspace = { id: workspaceId, name: 'Acme', slug: 'acme', plan: 'free' };
+  const membership = { workspace, role: 'admin' };
+
+  it('accepts a list of workspace memberships', () => {
+    expect(myWorkspaceMembershipSchema.parse(membership)).toEqual(membership);
+    expect(myWorkspacesResponseSchema.parse({ workspaces: [membership] })).toEqual({
+      workspaces: [membership],
+    });
+    expect(myWorkspacesResponseSchema.parse({ workspaces: [] })).toEqual({ workspaces: [] });
+  });
+
+  it('rejects an unknown role and a missing workspaces key', () => {
+    expect(() =>
+      myWorkspaceMembershipSchema.parse({ ...membership, role: 'owner' }),
+    ).toThrowError();
+    expect(() => myWorkspacesResponseSchema.parse({})).toThrowError();
   });
 });

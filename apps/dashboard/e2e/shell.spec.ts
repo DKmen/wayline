@@ -10,6 +10,15 @@ async function stubSession(page: Page, body: unknown, status = 200) {
   await page.route('**/api/auth/get-session', (route) =>
     route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) }),
   );
+  // The home route's loader always fetches this (WAYLI-30) — a signed-in visit through the
+  // real route tree never renders the shell without it, regardless of what this spec asserts.
+  await page.route('**/v1/me/workspaces', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ workspaces: [] }),
+    }),
+  );
 }
 
 test.describe('dashboard shell (WAYLI-29 acceptance)', () => {
@@ -69,6 +78,13 @@ test.describe('dashboard shell (WAYLI-29 acceptance)', () => {
           body: JSON.stringify(LIVE_SESSION),
         });
       });
+      await page.route('**/v1/me/workspaces', (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ workspaces: [] }),
+        }),
+      );
 
       await page.goto('/');
 
