@@ -22,9 +22,20 @@ export type { CreateWorkspaceRequest, Workspace } from './workspace';
 export {
   memberListItemSchema,
   memberListResponseSchema,
+  myWorkspaceMembershipSchema,
+  myWorkspacesResponseSchema,
   workspaceMemberSchema,
 } from './workspace-member';
-export type { MemberListItem, MemberListResponse, WorkspaceMember } from './workspace-member';
+export type {
+  MemberListItem,
+  MemberListResponse,
+  MyWorkspaceMembership,
+  MyWorkspacesResponse,
+  WorkspaceMember,
+} from './workspace-member';
+
+export { flowListResponseSchema, flowSchema, flowStatusSchema } from './flow';
+export type { Flow, FlowListResponse, FlowStatus } from './flow';
 
 export { invitationSchema } from './invitation';
 export type { Invitation } from './invitation';

@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 import {
   findMembershipWithWorkspace,
+  listMembershipsForUser,
   listMembersWithUsers,
   touchLastActiveAt,
 } from './memberships';
@@ -112,6 +113,43 @@ describe('touchLastActiveAt', () => {
         .from(workspaceMembers)
         .where(eq(workspaceMembers.userId, 'user_a'));
       expect(row!.lastActiveAt!.getTime()).toBeGreaterThan(stale.getTime());
+    } finally {
+      await close();
+    }
+  });
+});
+
+describe('listMembershipsForUser', () => {
+  it('returns every live workspace the user belongs to, with their role, oldest first', async () => {
+    const { db, close } = await createTestDb();
+
+    try {
+      const { wsA } = await seed(db);
+      const [wsC] = await db.insert(workspaces).values({ name: 'C', slug: 'ws-c' }).returning();
+      await db
+        .insert(workspaceMembers)
+        .values({ workspaceId: wsC!.id, userId: 'user_a', role: 'creator' });
+
+      const memberships = await listMembershipsForUser(db, 'user_a');
+
+      expect(memberships).toEqual([
+        { role: 'admin', workspace: { id: wsA.id, name: 'A', slug: 'ws-a', plan: 'free' } },
+        { role: 'creator', workspace: { id: wsC!.id, name: 'C', slug: 'ws-c', plan: 'free' } },
+      ]);
+    } finally {
+      await close();
+    }
+  });
+
+  it('excludes a workspace the user does not belong to and one that is soft-deleted', async () => {
+    const { db, close } = await createTestDb();
+
+    try {
+      const { wsA } = await seed(db);
+      await db.update(workspaces).set({ deletedAt: new Date() }).where(eq(workspaces.id, wsA.id));
+
+      expect(await listMembershipsForUser(db, 'user_a')).toEqual([]);
+      expect(await listMembershipsForUser(db, 'user_c')).toEqual([]);
     } finally {
       await close();
     }

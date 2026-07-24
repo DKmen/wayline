@@ -128,6 +128,21 @@ export async function createTestDb(): Promise<{
       created_at timestamptz NOT NULL DEFAULT now()
     );
   `);
+  await db.execute(sql`CREATE TYPE flow_status AS ENUM ('draft_local', 'published', 'archived');`);
+  await db.execute(sql`
+    CREATE TABLE flows (
+      id uuid PRIMARY KEY,
+      workspace_id uuid NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+      created_by text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title text NOT NULL,
+      status flow_status NOT NULL DEFAULT 'draft_local',
+      current_version_id uuid,
+      deleted_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    );
+  `);
+  await db.execute(sql`CREATE INDEX flows_workspace_id_idx ON flows (workspace_id);`);
 
   return { db, close: () => client.close() };
 }

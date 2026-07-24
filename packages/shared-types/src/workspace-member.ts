@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { roleSchema } from './role';
+import { workspaceSchema } from './workspace';
 
 /** Workspace membership wire shape (docs/04-data-model.md §2) — links a Better Auth user to one workspace with a role. */
 export const workspaceMemberSchema = z
@@ -29,3 +30,20 @@ export const memberListResponseSchema = z
   })
   .strict();
 export type MemberListResponse = z.infer<typeof memberListResponseSchema>;
+
+/** One workspace the caller belongs to, plus their role in it (docs/04-data-model.md §2). */
+export const myWorkspaceMembershipSchema = z
+  .object({
+    workspace: workspaceSchema,
+    role: roleSchema,
+  })
+  .strict();
+export type MyWorkspaceMembership = z.infer<typeof myWorkspaceMembershipSchema>;
+
+/** Response body for GET /v1/me/workspaces — the bootstrap query for "does this user have a workspace yet." */
+export const myWorkspacesResponseSchema = z
+  .object({
+    workspaces: z.array(myWorkspaceMembershipSchema),
+  })
+  .strict();
+export type MyWorkspacesResponse = z.infer<typeof myWorkspacesResponseSchema>;

@@ -18,11 +18,20 @@ function buildRouter(queryClient: QueryClient, initialEntry: string) {
   });
 }
 
-function renderApp(sessionResponse: unknown, initialEntry = '/') {
+/** Routes by URL: the real DashboardHome also loads /v1/me/workspaces, not just the session. */
+function stubFetch(sessionResponse: unknown) {
   vi.stubGlobal(
     'fetch',
-    vi.fn().mockResolvedValue(new Response(JSON.stringify(sessionResponse), { status: 200 })),
+    vi.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+      const body = url.includes('/v1/me/workspaces') ? { workspaces: [] } : sessionResponse;
+      return Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
+    }),
   );
+}
+
+function renderApp(sessionResponse: unknown, initialEntry = '/') {
+  stubFetch(sessionResponse);
 
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = buildRouter(queryClient, initialEntry);
@@ -49,7 +58,7 @@ describe('protected route guard (real route tree)', () => {
       user: { id: 'user_1', email: 'ada@example.com', name: 'Ada' },
     });
 
-    expect(await screen.findByText(/welcome, ada@example.com/i)).toBeInTheDocument();
+    expect(await screen.findByText('Create your workspace')).toBeInTheDocument();
   });
 
   it('bounces an already-signed-in visitor away from /sign-in back to the shell', async () => {
@@ -61,7 +70,7 @@ describe('protected route guard (real route tree)', () => {
       '/sign-in',
     );
 
-    expect(await screen.findByText(/welcome, ada@example.com/i)).toBeInTheDocument();
+    expect(await screen.findByText('Create your workspace')).toBeInTheDocument();
   });
 
   it('renders the sign-in form when no redirect search param is present', async () => {
@@ -81,7 +90,7 @@ describe('protected route guard (real route tree)', () => {
 
     // search validation collapses the non-same-origin value to undefined, so the
     // already-signed-in bounce lands on the shell (/) — never on evil.example.com.
-    expect(await screen.findByText(/welcome, ada@example.com/i)).toBeInTheDocument();
+    expect(await screen.findByText('Create your workspace')).toBeInTheDocument();
   });
 
   it('redirects mid-session once the session expires and the route re-validates', async () => {
@@ -89,10 +98,10 @@ describe('protected route guard (real route tree)', () => {
       session: { expiresAt: '2026-08-01T00:00:00.000Z' },
       user: { id: 'user_1', email: 'ada@example.com', name: 'Ada' },
     });
-    await screen.findByText(/welcome, ada@example.com/i);
+    await screen.findByText('Create your workspace');
 
     // Simulate the session expiring server-side: the next get-session call returns null.
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('null', { status: 200 })));
+    stubFetch(null);
     queryClient.removeQueries({ queryKey: sessionQueryOptions.queryKey });
     await router.invalidate();
 
