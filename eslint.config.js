@@ -10,6 +10,7 @@ export default tseslint.config(
     ignores: [
       '**/dist/**',
       '**/.output/**',
+      '**/.wxt/**',
       '**/.turbo/**',
       '**/coverage/**',
       '**/node_modules/**',

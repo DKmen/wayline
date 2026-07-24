@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '../../lib/utils';
 
 /** Wayline's themed text input — border/ring/placeholder colors come from the shared OKLCH tokens. */
 function Input({ className, type, ...props }: React.ComponentProps<'input'>) {

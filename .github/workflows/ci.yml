@@ -106,6 +106,20 @@ jobs:
       - name: 'e2e smoke suite: dashboard (Playwright, not coverage-gated)'
         if: always()
         run: pnpm --filter @wayline/dashboard test:e2e --grep @smoke
+      - name: Build extension (Playwright loads the built .output/, not a dev server)
+        if: always()
+        run: pnpm --filter @wayline/extension build
+      - name: Install Playwright Chromium (extension)
+        if: always()
+        run: pnpm --filter @wayline/extension exec playwright install --with-deps chromium
+      - name: Install xvfb (headed Chromium needs a virtual display on this runner)
+        if: always()
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+      - name: 'e2e smoke suite: extension (Playwright, not coverage-gated)'
+        if: always()
+        # MV3 background service workers only reliably register in headed Chromium (see
+        # extension-fixtures.ts) — xvfb-run gives this headless runner a virtual display.
+        run: xvfb-run -a pnpm --filter @wayline/extension test:e2e --grep @smoke
       - name: Upload Playwright HTML reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -114,4 +128,5 @@ jobs:
           path: |
             apps/fixture/playwright-report/
             apps/dashboard/playwright-report/
+            apps/extension/playwright-report/
           retention-days: 7

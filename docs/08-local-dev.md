@@ -84,9 +84,9 @@ Rules:
 | Seed demo data             | `pnpm db:seed` (demo workspace, 2 flows, fake events)                                                                                                                          |
 | Unit tests                 | `pnpm test` (Vitest, full-repo — one shared root config, not per-package)                                                                                                      |
 | Storybook (`packages/ui`)  | `pnpm --filter @wayline/ui dev` (one-time setup: `npx playwright install chromium`, needed for `pnpm --filter @wayline/ui test:storybook`'s real-browser a11y/contrast checks) |
-| E2E                        | `pnpm test:e2e` (Playwright, `@wayline/fixture` + `@wayline/dashboard`; extension-loaded suites are a later addition once that app exists)                                     |
-| Extension dev              | `pnpm --filter extension dev` (WXT launches Chromium with extension)                                                                                                           |
-| Load extension manually    | `pnpm --filter extension build` → load `dist/` unpacked                                                                                                                        |
+| E2E                        | `pnpm test:e2e` (Playwright, `@wayline/fixture` + `@wayline/dashboard` + `@wayline/extension`)                                                                                 |
+| Extension dev              | `pnpm --filter @wayline/extension dev` (WXT launches Chromium with extension)                                                                                                  |
+| Load extension manually    | `pnpm --filter @wayline/extension build` → load `.output/chrome-mv3/` unpacked (`chrome://extensions` → Developer mode → Load unpacked)                                        |
 | Deploy dev env             | GitHub Actions `workflow_dispatch` → dev account                                                                                                                               |
 | Sync Claude into Codex     | `$sync-context` in Codex, or `pnpm context:sync --for codex`                                                                                                                   |
 | Sync Codex into Claude     | `/sync-context` in Claude, or `pnpm context:sync --for claude`                                                                                                                 |
