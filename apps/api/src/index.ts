@@ -14,7 +14,7 @@ const auth = createAuth({
   baseURL: env.APP_URL,
   trustedOrigins: [env.DASHBOARD_URL],
 });
-const app = createApp(auth, db);
+const app = createApp(auth, db, env.EXTENSION_ID);
 
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   console.log(`apps/api listening on http://localhost:${info.port}`);

@@ -15,7 +15,9 @@ async function buildHarness() {
     }),
   };
   const auth = createAuth({ db, mailer, secret: 'a'.repeat(32), baseURL: 'http://localhost:3000' });
-  const app = createApp(auth, db);
+  // '' means every chrome-extension:// origin is rejected — this file only exercises
+  // the dashboard-style magic-link flow, which the guard never touches.
+  const app = createApp(auth, db, '');
 
   return { app, db, sentMail, close };
 }

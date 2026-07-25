@@ -4,13 +4,20 @@ import type { DbExecutor } from './db/scoped';
 import type { createAuth } from './lib/auth';
 import { apiErrorHandler } from './lib/error-handler';
 import { logSafe } from './lib/logger';
+import { extensionOriginGuard } from './middleware/extension-origin-guard';
 import { createV1Routes } from './routes';
 
 type Auth = ReturnType<typeof createAuth>;
 
-/** Builds the Wayline API Hono app: Better Auth under /api/auth, tenant routes under /v1. */
-export function createApp(auth: Auth, db: DbExecutor): Hono<AppEnv> {
+/**
+ * Builds the Wayline API Hono app: Better Auth under /api/auth, tenant routes under /v1.
+ * extensionId configures the origin guard (WAYLI-34) — pass '' to reject every
+ * chrome-extension:// caller (the same fail-closed default as env.EXTENSION_ID).
+ */
+export function createApp(auth: Auth, db: DbExecutor, extensionId: string): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
+
+  app.use('*', extensionOriginGuard(extensionId));
 
   app.use('*', async (c, next) => {
     const start = Date.now();
