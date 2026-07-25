@@ -2,11 +2,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const addListener = vi.fn();
 const executeScript = vi.fn().mockResolvedValue([]);
+const containsPermission = vi.fn();
 
 vi.mock('wxt/browser', () => ({
   browser: {
     runtime: { onMessage: { addListener } },
     scripting: { executeScript },
+    permissions: { contains: containsPermission },
   },
 }));
 
@@ -16,25 +18,68 @@ const {
   isStartRecordingMessage,
 } = await import('./index');
 
+const hasHostPermission = vi.fn();
+
 afterEach(() => {
   vi.clearAllMocks();
 });
 
 describe('handleStartRecording', () => {
-  it('injects the content script and reports ok for a normal page', async () => {
-    const result = await handleStartRecording('https://example.com/', 7, executeScript);
+  it('injects the content script and reports ok when permission is granted', async () => {
+    hasHostPermission.mockResolvedValue(true);
+
+    const result = await handleStartRecording(
+      'https://example.com/',
+      7,
+      executeScript,
+      hasHostPermission,
+    );
 
     expect(result).toEqual({ ok: true });
+    expect(hasHostPermission).toHaveBeenCalledWith('https://example.com/*');
     expect(executeScript).toHaveBeenCalledWith({
       target: { tabId: 7 },
       files: ['content-scripts/content.js'],
     });
   });
 
-  it('refuses a restricted page without injecting anything', async () => {
-    const result = await handleStartRecording('chrome://extensions/', 7, executeScript);
+  it('refuses a restricted page without injecting anything or checking permission', async () => {
+    const result = await handleStartRecording(
+      'chrome://extensions/',
+      7,
+      executeScript,
+      hasHostPermission,
+    );
 
     expect(result).toEqual({ ok: false, reason: 'unsupported-page' });
+    expect(hasHostPermission).not.toHaveBeenCalled();
+    expect(executeScript).not.toHaveBeenCalled();
+  });
+
+  it('blocks a normal page whose host permission has not been granted', async () => {
+    hasHostPermission.mockResolvedValue(false);
+
+    const result = await handleStartRecording(
+      'https://example.com/',
+      7,
+      executeScript,
+      hasHostPermission,
+    );
+
+    expect(result).toEqual({ ok: false, reason: 'permission-missing' });
+    expect(executeScript).not.toHaveBeenCalled();
+  });
+
+  it('blocks a page whose URL cannot be turned into a host permission pattern', async () => {
+    const result = await handleStartRecording(
+      'file:///Users/x/notes.html',
+      7,
+      executeScript,
+      hasHostPermission,
+    );
+
+    expect(result).toEqual({ ok: false, reason: 'permission-missing' });
+    expect(hasHostPermission).not.toHaveBeenCalled();
     expect(executeScript).not.toHaveBeenCalled();
   });
 });
@@ -58,7 +103,8 @@ describe('isStartRecordingMessage', () => {
 });
 
 describe('background main()', () => {
-  it('registers a message listener that forwards a valid start-recording message', async () => {
+  it('registers a message listener that forwards a valid start-recording message and checks permission', async () => {
+    containsPermission.mockResolvedValue(true);
     backgroundDefinition.main();
     const listener = addListener.mock.calls[0]![0] as (
       message: unknown,
@@ -71,6 +117,7 @@ describe('background main()', () => {
     });
 
     expect(result).toEqual({ ok: true });
+    expect(containsPermission).toHaveBeenCalledWith({ origins: ['https://example.com/*'] });
     expect(executeScript).toHaveBeenCalledWith({
       target: { tabId: 3 },
       files: ['content-scripts/content.js'],
