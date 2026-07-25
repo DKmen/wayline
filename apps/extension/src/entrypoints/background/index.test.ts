@@ -78,7 +78,7 @@ describe('handleStartRecording', () => {
       hasHostPermission,
     );
 
-    expect(result).toEqual({ ok: false, reason: 'permission-missing' });
+    expect(result).toEqual({ ok: false, reason: 'unsupported-page' });
     expect(hasHostPermission).not.toHaveBeenCalled();
     expect(executeScript).not.toHaveBeenCalled();
   });

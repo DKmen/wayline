@@ -88,16 +88,14 @@ describe('popup App', () => {
     expect(sendMessage).toHaveBeenCalledTimes(1);
   });
 
-  it('shows a denial message without requesting permission when the tab URL cannot produce a pattern', async () => {
+  it('shows the unsupported-page empty state when the tab URL cannot produce a host permission pattern', async () => {
     tabsQuery.mockResolvedValue([{ id: 7, url: 'file:///Users/x/notes.html' }]);
-    sendMessage.mockResolvedValue({ ok: false, reason: 'permission-missing' });
+    sendMessage.mockResolvedValue({ ok: false, reason: 'unsupported-page' });
 
     render(<App />);
     await userEvent.click(screen.getByRole('button', { name: /start recording/i }));
-    await userEvent.click(screen.getByRole('button', { name: /allow/i }));
 
+    expect(await screen.findByText("This page can't be recorded")).toBeInTheDocument();
     expect(permissionsRequest).not.toHaveBeenCalled();
-    expect(await screen.findByText(/permission was denied/i)).toBeInTheDocument();
-    expect(sendMessage).toHaveBeenCalledTimes(1);
   });
 });

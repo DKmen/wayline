@@ -26,7 +26,8 @@ export async function handleStartRecording(
   if (isRestrictedUrl(url)) return { ok: false, reason: 'unsupported-page' };
 
   const pattern = hostPermissionPatternFor(url);
-  if (!pattern || !(await hasHostPermission(pattern))) {
+  if (!pattern) return { ok: false, reason: 'unsupported-page' };
+  if (!(await hasHostPermission(pattern))) {
     return { ok: false, reason: 'permission-missing' };
   }
 
