@@ -13,12 +13,16 @@ export async function checkExtensionInstalled(extensionId: string): Promise<bool
   if (!extensionId || !runtime?.sendMessage) return false;
 
   return new Promise((resolve) => {
-    runtime.sendMessage!(extensionId, { type: 'ping' }, (response) => {
-      if (runtime.lastError) {
-        resolve(false);
-        return;
-      }
-      resolve((response as { installed?: boolean } | undefined)?.installed === true);
-    });
+    try {
+      runtime.sendMessage!(extensionId, { type: 'ping' }, (response) => {
+        if (runtime.lastError) {
+          resolve(false);
+          return;
+        }
+        resolve((response as { installed?: boolean } | undefined)?.installed === true);
+      });
+    } catch {
+      resolve(false);
+    }
   });
 }

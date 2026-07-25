@@ -38,4 +38,16 @@ describe('checkExtensionInstalled', () => {
 
     await expect(checkExtensionInstalled('')).resolves.toBe(false);
   });
+
+  it('resolves false when sendMessage throws synchronously (malformed extension ID)', async () => {
+    vi.stubGlobal('chrome', {
+      runtime: {
+        sendMessage: () => {
+          throw new TypeError('Invalid extension id');
+        },
+      },
+    });
+
+    await expect(checkExtensionInstalled('not-a-valid-id')).resolves.toBe(false);
+  });
 });
