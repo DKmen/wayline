@@ -1,22 +1,35 @@
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/utils/define-background';
+import { hostPermissionPatternFor } from '../../utils/hostPermissionPattern';
 import { isRestrictedUrl } from '../../utils/isRestrictedUrl';
 
-export type StartRecordingResult = { ok: true } | { ok: false; reason: 'unsupported-page' };
+export type StartRecordingResult =
+  | { ok: true }
+  | { ok: false; reason: 'unsupported-page' }
+  | { ok: false; reason: 'permission-missing' };
 
 type ExecuteScript = typeof browser.scripting.executeScript;
+type HasHostPermission = (pattern: string) => Promise<boolean>;
 
 /**
  * Decides whether the active tab can be recorded and, if so, injects the (runtime-registered,
  * not manifest-declared) content script — docs/06-extension-spec.md §1, §6. Takes
- * `executeScript` as a parameter so this branching logic is testable without a browser.
+ * `executeScript` and `hasHostPermission` as parameters so this branching logic is testable
+ * without a browser.
  */
 export async function handleStartRecording(
   url: string,
   tabId: number,
   executeScript: ExecuteScript,
+  hasHostPermission: HasHostPermission,
 ): Promise<StartRecordingResult> {
   if (isRestrictedUrl(url)) return { ok: false, reason: 'unsupported-page' };
+
+  const pattern = hostPermissionPatternFor(url);
+  if (!pattern) return { ok: false, reason: 'unsupported-page' };
+  if (!(await hasHostPermission(pattern))) {
+    return { ok: false, reason: 'permission-missing' };
+  }
 
   await executeScript({ target: { tabId }, files: ['content-scripts/content.js'] });
   return { ok: true };
@@ -40,7 +53,12 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener((message: unknown) => {
     if (!isStartRecordingMessage(message)) return;
 
-    return handleStartRecording(message.url, message.tabId, browser.scripting.executeScript);
+    return handleStartRecording(
+      message.url,
+      message.tabId,
+      browser.scripting.executeScript,
+      (pattern) => browser.permissions.contains({ origins: [pattern] }),
+    );
   });
 
   // Exposed unconditionally for the Playwright build/load + restricted-page e2e suite

@@ -4,11 +4,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const tabsQuery = vi.fn();
 const sendMessage = vi.fn();
+const permissionsRequest = vi.fn();
 
 vi.mock('wxt/browser', () => ({
   browser: {
     tabs: { query: tabsQuery },
     runtime: { sendMessage },
+    permissions: { request: permissionsRequest },
   },
 }));
 
@@ -52,5 +54,48 @@ describe('popup App', () => {
 
     expect(await screen.findByText("This page can't be recorded")).toBeInTheDocument();
     expect(sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('shows the permission disclosure card and starts recording after the user allows', async () => {
+    tabsQuery.mockResolvedValue([{ id: 7, url: 'https://example.com/' }]);
+    sendMessage
+      .mockResolvedValueOnce({ ok: false, reason: 'permission-missing' })
+      .mockResolvedValueOnce({ ok: true });
+    permissionsRequest.mockResolvedValue(true);
+
+    render(<App />);
+    await userEvent.click(screen.getByRole('button', { name: /start recording/i }));
+
+    expect(await screen.findByText('Wayline needs access to this site')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /allow/i }));
+
+    expect(permissionsRequest).toHaveBeenCalledWith({ origins: ['https://example.com/*'] });
+    expect(sendMessage).toHaveBeenCalledTimes(2);
+    expect(await screen.findByRole('button', { name: /start recording/i })).toBeInTheDocument();
+  });
+
+  it('shows a denial message and does not retry when the permission request is refused', async () => {
+    tabsQuery.mockResolvedValue([{ id: 7, url: 'https://example.com/' }]);
+    sendMessage.mockResolvedValue({ ok: false, reason: 'permission-missing' });
+    permissionsRequest.mockResolvedValue(false);
+
+    render(<App />);
+    await userEvent.click(screen.getByRole('button', { name: /start recording/i }));
+    await userEvent.click(screen.getByRole('button', { name: /allow/i }));
+
+    expect(await screen.findByText(/permission was denied/i)).toBeInTheDocument();
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the unsupported-page empty state when the tab URL cannot produce a host permission pattern', async () => {
+    tabsQuery.mockResolvedValue([{ id: 7, url: 'file:///Users/x/notes.html' }]);
+    sendMessage.mockResolvedValue({ ok: false, reason: 'unsupported-page' });
+
+    render(<App />);
+    await userEvent.click(screen.getByRole('button', { name: /start recording/i }));
+
+    expect(await screen.findByText("This page can't be recorded")).toBeInTheDocument();
+    expect(permissionsRequest).not.toHaveBeenCalled();
   });
 });
