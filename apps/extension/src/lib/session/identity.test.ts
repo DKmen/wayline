@@ -87,4 +87,16 @@ describe('fetchIdentity', () => {
 
     await expect(fetchIdentity(fetchImpl)).resolves.toBeNull();
   });
+
+  it('returns null when the fetch itself rejects (network failure)', async () => {
+    const fetchImpl = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+
+    await expect(fetchIdentity(fetchImpl)).resolves.toBeNull();
+  });
+
+  it('returns null when the session response body does not match the expected schema', async () => {
+    const fetchImpl = vi.fn().mockResolvedValueOnce(jsonResponse({ not: 'a valid session shape' }));
+
+    await expect(fetchIdentity(fetchImpl)).resolves.toBeNull();
+  });
 });
