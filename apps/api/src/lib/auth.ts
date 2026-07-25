@@ -49,7 +49,18 @@ export function createAuth(deps: {
     // Better Auth auto-disables its origin/CSRF check whenever NODE_ENV === "test" —
     // pin it on explicitly so trustedOrigins is always enforced, not dependent on an
     // environment-variable heuristic (also makes the behavior testable deterministically).
-    advanced: { disableOriginCheck: false },
+    // sameSite:'none' is what lets the extension's service worker fetch() receive this
+    // cookie at all (a cross-context request is not "first-party" for SameSite purposes,
+    // regardless of host_permissions) — docs/03-architecture.md §3.2. secure:true is set
+    // explicitly rather than left to Better Auth's protocol-based auto-derivation: with
+    // APP_URL=http://localhost:3000 in local dev, auto-derivation would resolve to
+    // secure:false, and Chrome hard-rejects (not degrades) a SameSite=None cookie lacking
+    // Secure. Chrome's "localhost is a potentially trustworthy origin" exemption is what
+    // lets secure:true still work over plain http://localhost.
+    advanced: {
+      disableOriginCheck: false,
+      defaultCookieAttributes: { sameSite: 'none', secure: true },
+    },
     database: drizzleAdapter(deps.db, {
       provider: 'pg',
       schema: {

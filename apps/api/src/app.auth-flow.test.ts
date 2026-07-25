@@ -90,6 +90,26 @@ describe('passwordless auth flow', () => {
     }
   });
 
+  it('sets the session cookie with SameSite=None and Secure so the extension can read it cross-context', async () => {
+    const { app, sentMail, close } = await buildHarness();
+
+    try {
+      const requestRes = await requestMagicLink(app, 'cookie-attrs@example.com', '10.0.0.10');
+      expect(requestRes.status).toBe(200);
+
+      const magicLinkUrl = extractMagicLinkUrl(sentMail[0]!.html);
+      const verifyPath = magicLinkUrl.replace('http://localhost:3000', '');
+      const verifyRes = await followVerifyLink(app, verifyPath, '10.0.0.10');
+
+      const setCookie = verifyRes.headers.get('set-cookie');
+      expect(setCookie).toBeTruthy();
+      expect(setCookie).toContain('SameSite=None');
+      expect(setCookie).toContain('Secure');
+    } finally {
+      await close();
+    }
+  });
+
   it('rejects an expired magic-link token', async () => {
     const { app, db, sentMail, close } = await buildHarness();
 
