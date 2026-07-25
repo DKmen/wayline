@@ -87,4 +87,17 @@ describe('popup App', () => {
     expect(await screen.findByText(/permission was denied/i)).toBeInTheDocument();
     expect(sendMessage).toHaveBeenCalledTimes(1);
   });
+
+  it('shows a denial message without requesting permission when the tab URL cannot produce a pattern', async () => {
+    tabsQuery.mockResolvedValue([{ id: 7, url: 'file:///Users/x/notes.html' }]);
+    sendMessage.mockResolvedValue({ ok: false, reason: 'permission-missing' });
+
+    render(<App />);
+    await userEvent.click(screen.getByRole('button', { name: /start recording/i }));
+    await userEvent.click(screen.getByRole('button', { name: /allow/i }));
+
+    expect(permissionsRequest).not.toHaveBeenCalled();
+    expect(await screen.findByText(/permission was denied/i)).toBeInTheDocument();
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+  });
 });

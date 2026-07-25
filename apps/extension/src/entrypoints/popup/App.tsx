@@ -16,6 +16,11 @@ async function requestStart(tabId: number, url: string): Promise<StartRecordingR
   })) as StartRecordingResult;
 }
 
+function statusFor(result: StartRecordingResult): Status {
+  if (result.ok) return 'idle';
+  return result.reason === 'permission-missing' ? 'needs-permission' : 'unsupported-page';
+}
+
 /** Popup — start/pause/finish, sign-in state (docs/06-extension-spec.md §1). Sign-in and pause/finish land with the auth bridge and capture-engine tickets; this is the start-recording scaffold. */
 export function App() {
   const [status, setStatus] = useState<Status>('idle');
@@ -31,12 +36,7 @@ export function App() {
 
     setTab({ id: activeTab.id, url: activeTab.url });
     const result = await requestStart(activeTab.id, activeTab.url);
-
-    if (result.ok) {
-      setStatus('idle');
-      return;
-    }
-    setStatus(result.reason === 'permission-missing' ? 'needs-permission' : 'unsupported-page');
+    setStatus(statusFor(result));
   }
 
   async function handleAllow() {
@@ -52,7 +52,7 @@ export function App() {
 
     setStatus('starting');
     const result = await requestStart(tab.id, tab.url);
-    setStatus(result.ok ? 'idle' : 'unsupported-page');
+    setStatus(statusFor(result));
   }
 
   if (status === 'unsupported-page') {
