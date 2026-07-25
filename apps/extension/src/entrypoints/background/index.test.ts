@@ -1,12 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const addListener = vi.fn();
+const addListenerExternal = vi.fn();
 const executeScript = vi.fn().mockResolvedValue([]);
 const containsPermission = vi.fn();
 
 vi.mock('wxt/browser', () => ({
   browser: {
-    runtime: { onMessage: { addListener } },
+    runtime: {
+      onMessage: { addListener },
+      onMessageExternal: { addListener: addListenerExternal },
+    },
     scripting: { executeScript },
     permissions: { contains: containsPermission },
   },
@@ -16,6 +20,7 @@ const {
   default: backgroundDefinition,
   handleStartRecording,
   isStartRecordingMessage,
+  isPingMessage,
 } = await import('./index');
 
 const hasHostPermission = vi.fn();
@@ -102,6 +107,18 @@ describe('isStartRecordingMessage', () => {
   });
 });
 
+describe('isPingMessage', () => {
+  it('accepts a well-formed ping message', () => {
+    expect(isPingMessage({ type: 'ping' })).toBe(true);
+  });
+
+  it('rejects malformed or unrelated messages', () => {
+    expect(isPingMessage(null)).toBe(false);
+    expect(isPingMessage('ping')).toBe(false);
+    expect(isPingMessage({ type: 'something-else' })).toBe(false);
+  });
+});
+
 describe('background main()', () => {
   it('registers a message listener that forwards a valid start-recording message and checks permission', async () => {
     containsPermission.mockResolvedValue(true);
@@ -143,5 +160,27 @@ describe('background main()', () => {
       (globalThis as { __wayline_testHandleStartRecording?: unknown })
         .__wayline_testHandleStartRecording,
     ).toBe(handleStartRecording);
+  });
+
+  it('registers an external message listener that responds to a ping', async () => {
+    backgroundDefinition.main();
+    const listener = addListenerExternal.mock.calls[0]![0] as (
+      message: unknown,
+    ) => Promise<unknown> | undefined;
+
+    const result = await listener({ type: 'ping' });
+
+    expect(result).toEqual({ installed: true });
+  });
+
+  it('ignores an unrelated external message', async () => {
+    backgroundDefinition.main();
+    const listener = addListenerExternal.mock.calls[0]![0] as (
+      message: unknown,
+    ) => Promise<unknown> | undefined;
+
+    const result = await listener({ type: 'something-else' });
+
+    expect(result).toBeUndefined();
   });
 });

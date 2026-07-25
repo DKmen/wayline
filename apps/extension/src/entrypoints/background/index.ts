@@ -47,6 +47,16 @@ export function isStartRecordingMessage(message: unknown): message is StartRecor
   );
 }
 
+export type PingMessage = { type: 'ping' };
+
+export function isPingMessage(message: unknown): message is PingMessage {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    (message as { type?: unknown }).type === 'ping'
+  );
+}
+
 export default defineBackground(() => {
   // Sent from the popup (not a content script), so there's no `sender.tab` to read from —
   // the popup queries the active tab itself and passes tabId/url explicitly.
@@ -59,6 +69,13 @@ export default defineBackground(() => {
       browser.scripting.executeScript,
       (pattern) => browser.permissions.contains({ origins: [pattern] }),
     );
+  });
+
+  // externally_connectable restricts senders to https://app.wayline.app/* (wxt.config.ts) —
+  // the browser enforces that boundary before this listener ever runs (WAYLI-33).
+  browser.runtime.onMessageExternal.addListener((message: unknown) => {
+    if (!isPingMessage(message)) return;
+    return Promise.resolve({ installed: true });
   });
 
   // Exposed unconditionally for the Playwright build/load + restricted-page e2e suite
