@@ -5,16 +5,27 @@ import { z } from 'zod';
 // Re-derive the same schema shape as env.ts rather than importing the module (which
 // reads import.meta.env at import time) — this test exercises createEnv's behavior
 // against controlled inputs instead of the ambient Vite env.
-const schema = z.object({ VITE_API_URL: z.string().default('') });
+const schema = z.object({
+  VITE_API_URL: z.string().default(''),
+  VITE_EXTENSION_ID: z.string().default(''),
+});
 
 describe('dashboard env schema', () => {
-  it('defaults VITE_API_URL to empty (same-origin/proxied) when unset', () => {
-    expect(createEnv(schema, {})).toEqual({ VITE_API_URL: '' });
+  it('defaults VITE_API_URL and VITE_EXTENSION_ID to empty when unset', () => {
+    expect(createEnv(schema, {})).toEqual({ VITE_API_URL: '', VITE_EXTENSION_ID: '' });
   });
 
   it('accepts an explicit cross-origin API URL', () => {
     expect(createEnv(schema, { VITE_API_URL: 'https://api.wayline.app' })).toEqual({
       VITE_API_URL: 'https://api.wayline.app',
+      VITE_EXTENSION_ID: '',
+    });
+  });
+
+  it('accepts an explicit extension ID', () => {
+    expect(createEnv(schema, { VITE_EXTENSION_ID: 'abcdefghijklmnopabcdefghijklmnop' })).toEqual({
+      VITE_API_URL: '',
+      VITE_EXTENSION_ID: 'abcdefghijklmnopabcdefghijklmnop',
     });
   });
 
