@@ -1,9 +1,9 @@
 type CookieChangeInfo = { removed: boolean; cookie: { name: string } };
 type OnChanged = { addListener: (listener: (info: CookieChangeInfo) => void) => void };
 
-// Coupled to lib/auth.ts's advanced.defaultCookieAttributes.secure:true (WAYLI-34),
-// which makes Better Auth always use its __Secure- prefixed cookie name in every
-// environment, not just production — must be updated in lockstep if that ever changes.
+// Coupled to lib/auth.ts's advanced.useSecureCookies:true (WAYLI-34), which forces the
+// __Secure- cookie name prefix in every environment (not just when baseURL is https://)
+// — must be updated in lockstep if that ever changes.
 export const WAYLINE_SESSION_COOKIE_NAME = '__Secure-better-auth.session_token';
 
 /** True if `changeInfo` reports the Wayline session cookie being removed (vs. set/updated). */

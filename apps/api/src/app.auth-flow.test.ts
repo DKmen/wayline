@@ -107,6 +107,7 @@ describe('passwordless auth flow', () => {
       expect(setCookie).toBeTruthy();
       expect(setCookie).toContain('SameSite=None');
       expect(setCookie).toContain('Secure');
+      expect(setCookie).toContain('__Secure-better-auth.session_token');
     } finally {
       await close();
     }

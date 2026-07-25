@@ -59,6 +59,12 @@ export function createAuth(deps: {
     // lets secure:true still work over plain http://localhost.
     advanced: {
       disableOriginCheck: false,
+      // useSecureCookies forces the __Secure- cookie name prefix in every environment
+      // (not just when baseURL is https://), so the name apps/extension's cookie watcher
+      // matches against (WAYLI-34) is identical locally and in production — otherwise
+      // Better Auth falls back to a protocol check on APP_URL, which is http:// in local
+      // dev and would silently produce a differently-named cookie there.
+      useSecureCookies: true,
       defaultCookieAttributes: { sameSite: 'none', secure: true },
     },
     database: drizzleAdapter(deps.db, {
