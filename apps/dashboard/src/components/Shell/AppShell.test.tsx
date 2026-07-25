@@ -171,7 +171,13 @@ describe('AppShell', () => {
       { type: 'session-ready' },
       expect.any(Function),
     );
-    expect(sendMessage).toHaveBeenCalledTimes(1);
+    // sendMessage is shared with the WAYLI-33 extension-install-check ping (also fired
+    // by this render), so filter to the session-ready payload specifically rather than
+    // asserting a raw total call count across both message types.
+    const sessionReadyCalls = sendMessage.mock.calls.filter(
+      ([, message]) => (message as { type?: string })?.type === 'session-ready',
+    );
+    expect(sessionReadyCalls).toHaveLength(1);
   });
 
   it('sends a session-ended ping right after a successful sign-out', async () => {
