@@ -10,7 +10,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AppShell } from './AppShell';
+
+vi.mock('../../env', () => ({ env: { VITE_API_URL: '', VITE_EXTENSION_ID: 'test-extension-id' } }));
+
+const { AppShell } = await import('./AppShell');
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -121,5 +124,33 @@ describe('AppShell', () => {
     await screen.findByText('Home content');
 
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('shows "Extension installed" when the extension responds to the ping', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(new Response(JSON.stringify(null), { status: 200 })),
+    );
+    vi.stubGlobal('chrome', {
+      runtime: {
+        sendMessage: (_id: string, _message: unknown, callback: (response: unknown) => void) =>
+          callback({ installed: true }),
+      },
+    });
+
+    renderShell();
+
+    expect(await screen.findByText('Extension installed')).toBeInTheDocument();
+  });
+
+  it('shows "Extension not detected" when the extension is absent', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(new Response(JSON.stringify(null), { status: 200 })),
+    );
+
+    renderShell();
+
+    expect(await screen.findByText('Extension not detected')).toBeInTheDocument();
   });
 });

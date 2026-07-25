@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, Outlet, useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button } from '@wayline/ui';
+import { Badge, Button } from '@wayline/ui';
+import { useExtensionInstalled } from '../../hooks/use-extension-installed';
 import { useSession } from '../../hooks/use-session';
 import { fetchJson } from '../../lib/api-client';
 import { sessionQueryOptions } from '../../lib/session';
@@ -10,6 +11,7 @@ import { SkipLink } from './SkipLink';
 /** Signed-in shell: skip link, primary nav, and the active route's content. */
 export function AppShell() {
   const { data: session } = useSession();
+  const { data: extensionInstalled } = useExtensionInstalled();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [signOutError, setSignOutError] = useState(false);
@@ -39,19 +41,24 @@ export function AppShell() {
             Wayline
           </Link>
         </nav>
-        {session?.user ? (
-          <div className="flex items-center gap-3">
-            {signOutError ? (
-              <span role="alert" className="text-sm text-destructive">
-                Couldn&apos;t sign out. Try again.
-              </span>
-            ) : null}
-            <span className="text-sm text-muted-foreground">{session.user.email}</span>
-            <Button variant="outline" onClick={handleSignOut}>
-              Sign out
-            </Button>
-          </div>
-        ) : null}
+        <div className="flex items-center gap-3">
+          <Badge variant={extensionInstalled ? 'default' : 'outline'}>
+            {extensionInstalled ? 'Extension installed' : 'Extension not detected'}
+          </Badge>
+          {session?.user ? (
+            <>
+              {signOutError ? (
+                <span role="alert" className="text-sm text-destructive">
+                  Couldn&apos;t sign out. Try again.
+                </span>
+              ) : null}
+              <span className="text-sm text-muted-foreground">{session.user.email}</span>
+              <Button variant="outline" onClick={handleSignOut}>
+                Sign out
+              </Button>
+            </>
+          ) : null}
+        </div>
       </header>
       <main id="main" className="flex-1">
         <Outlet />
