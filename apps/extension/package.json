@@ -13,6 +13,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@wayline/shared-types": "workspace:*",
     "@wayline/ui": "workspace:*",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"

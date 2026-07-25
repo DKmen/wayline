@@ -175,6 +175,9 @@ importers:
 
   apps/extension:
     dependencies:
+      '@wayline/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@wayline/ui':
         specifier: workspace:*
         version: link:../../packages/ui
