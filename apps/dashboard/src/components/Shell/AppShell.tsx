@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge, Button } from '@wayline/ui';
+import { env } from '../../env';
 import { useExtensionInstalled } from '../../hooks/use-extension-installed';
 import { useSession } from '../../hooks/use-session';
 import { fetchJson } from '../../lib/api-client';
+import { sendSessionEndedPing, sendSessionReadyPing } from '../../lib/extension';
 import { sessionQueryOptions } from '../../lib/session';
 import { SkipLink } from './SkipLink';
 
@@ -15,6 +17,18 @@ export function AppShell() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [signOutError, setSignOutError] = useState(false);
+  const sentReadyPing = useRef(false);
+
+  useEffect(() => {
+    // Fires once per mount, not on every 60s background refetch of the session query —
+    // there's no discrete "sign-in just completed" event to hook (magic-link
+    // verification redirects server-side), so "the signed-in shell rendered" is the
+    // trigger (docs/03-architecture.md §3.2).
+    if (session?.user && !sentReadyPing.current) {
+      sentReadyPing.current = true;
+      sendSessionReadyPing(env.VITE_EXTENSION_ID);
+    }
+  }, [session]);
 
   async function handleSignOut() {
     setSignOutError(false);
@@ -24,6 +38,7 @@ export function AppShell() {
       setSignOutError(true);
       return;
     }
+    sendSessionEndedPing(env.VITE_EXTENSION_ID);
     // Sign-out just succeeded server-side, so the answer is already known — write it
     // directly instead of invalidateQueries, which would trigger a redundant refetch
     // of the still-active session query and delay the redirect below on it.
