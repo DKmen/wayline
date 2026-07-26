@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const addListener = vi.fn();
 const addListenerExternal = vi.fn();
+const addCookieChangedListener = vi.fn();
 const executeScript = vi.fn().mockResolvedValue([]);
 const containsPermission = vi.fn();
 
@@ -13,8 +14,13 @@ vi.mock('wxt/browser', () => ({
     },
     scripting: { executeScript },
     permissions: { contains: containsPermission },
+    cookies: { onChanged: { addListener: addCookieChangedListener } },
   },
 }));
+
+const handleSessionReady = vi.fn().mockResolvedValue(undefined);
+const handleSessionEnded = vi.fn().mockResolvedValue(undefined);
+vi.mock('./session', () => ({ handleSessionReady, handleSessionEnded }));
 
 const {
   default: backgroundDefinition,
@@ -173,6 +179,28 @@ describe('background main()', () => {
     expect(result).toEqual({ installed: true });
   });
 
+  it('delegates a session-ready external message to handleSessionReady', async () => {
+    backgroundDefinition.main();
+    const listener = addListenerExternal.mock.calls[0]![0] as (
+      message: unknown,
+    ) => Promise<unknown> | undefined;
+
+    await listener({ type: 'session-ready' });
+
+    expect(handleSessionReady).toHaveBeenCalledOnce();
+  });
+
+  it('delegates a session-ended external message to handleSessionEnded', async () => {
+    backgroundDefinition.main();
+    const listener = addListenerExternal.mock.calls[0]![0] as (
+      message: unknown,
+    ) => Promise<unknown> | undefined;
+
+    await listener({ type: 'session-ended' });
+
+    expect(handleSessionEnded).toHaveBeenCalledOnce();
+  });
+
   it('ignores an unrelated external message', async () => {
     backgroundDefinition.main();
     const listener = addListenerExternal.mock.calls[0]![0] as (
@@ -182,5 +210,11 @@ describe('background main()', () => {
     const result = await listener({ type: 'something-else' });
 
     expect(result).toBeUndefined();
+  });
+
+  it('registers the cookie watcher on startup', () => {
+    backgroundDefinition.main();
+
+    expect(addCookieChangedListener).toHaveBeenCalledOnce();
   });
 });

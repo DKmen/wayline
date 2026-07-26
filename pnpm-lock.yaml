@@ -175,6 +175,9 @@ importers:
 
   apps/extension:
     dependencies:
+      '@wayline/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@wayline/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -206,6 +209,9 @@ importers:
       '@wxt-dev/module-react':
         specifier: ^1.2.2
         version: 1.2.2(vite@8.1.4(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.23.0)(yaml@2.9.0))(wxt@0.20.27(@types/node@26.1.1)(eslint@9.39.4(jiti@2.7.0))(jiti@2.7.0)(oxc-parser@0.127.0)(rolldown@1.1.5)(rollup@4.62.2)(tsx@4.23.0)(yaml@2.9.0))
+      vite:
+        specifier: ^8.1.4
+        version: 8.1.4(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.23.0)(yaml@2.9.0)
       wxt:
         specifier: ^0.20.27
         version: 0.20.27(@types/node@26.1.1)(eslint@9.39.4(jiti@2.7.0))(jiti@2.7.0)(oxc-parser@0.127.0)(rolldown@1.1.5)(rollup@4.62.2)(tsx@4.23.0)(yaml@2.9.0)

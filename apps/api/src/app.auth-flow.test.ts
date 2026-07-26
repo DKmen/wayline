@@ -15,7 +15,9 @@ async function buildHarness() {
     }),
   };
   const auth = createAuth({ db, mailer, secret: 'a'.repeat(32), baseURL: 'http://localhost:3000' });
-  const app = createApp(auth, db);
+  // '' means every chrome-extension:// origin is rejected — this file only exercises
+  // the dashboard-style magic-link flow, which the guard never touches.
+  const app = createApp(auth, db, '', 'http://localhost:4400');
 
   return { app, db, sentMail, close };
 }
@@ -85,6 +87,27 @@ describe('passwordless auth flow', () => {
         .where(eq(users.email, 'person@example.com'));
       expect(persistedUser?.emailVerified).toBe(true);
       expect(persistedUser?.emailVerifiedAt).toBeInstanceOf(Date);
+    } finally {
+      await close();
+    }
+  });
+
+  it('sets the session cookie with SameSite=None and Secure so the extension can read it cross-context', async () => {
+    const { app, sentMail, close } = await buildHarness();
+
+    try {
+      const requestRes = await requestMagicLink(app, 'cookie-attrs@example.com', '10.0.0.10');
+      expect(requestRes.status).toBe(200);
+
+      const magicLinkUrl = extractMagicLinkUrl(sentMail[0]!.html);
+      const verifyPath = magicLinkUrl.replace('http://localhost:3000', '');
+      const verifyRes = await followVerifyLink(app, verifyPath, '10.0.0.10');
+
+      const setCookie = verifyRes.headers.get('set-cookie');
+      expect(setCookie).toBeTruthy();
+      expect(setCookie).toContain('SameSite=None');
+      expect(setCookie).toContain('Secure');
+      expect(setCookie).toContain('__Secure-better-auth.session_token');
     } finally {
       await close();
     }

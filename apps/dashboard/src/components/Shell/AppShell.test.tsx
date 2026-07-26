@@ -153,4 +153,60 @@ describe('AppShell', () => {
 
     expect(await screen.findByText('Extension not detected')).toBeInTheDocument();
   });
+
+  it('sends a session-ready ping once when the shell mounts with a signed-in session', async () => {
+    const sessionBody = JSON.stringify({
+      session: { expiresAt: '2026-08-01T00:00:00.000Z' },
+      user: { id: 'user_1', email: 'ada@example.com', name: 'Ada' },
+    });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(sessionBody, { status: 200 })));
+    const sendMessage = vi.fn();
+    vi.stubGlobal('chrome', { runtime: { sendMessage } });
+
+    renderShell();
+    await screen.findByText('ada@example.com');
+
+    expect(sendMessage).toHaveBeenCalledWith(
+      'test-extension-id',
+      { type: 'session-ready' },
+      expect.any(Function),
+    );
+    // sendMessage is shared with the WAYLI-33 extension-install-check ping (also fired
+    // by this render), so filter to the session-ready payload specifically rather than
+    // asserting a raw total call count across both message types.
+    const sessionReadyCalls = sendMessage.mock.calls.filter(
+      ([, message]) => (message as { type?: string })?.type === 'session-ready',
+    );
+    expect(sessionReadyCalls).toHaveLength(1);
+  });
+
+  it('sends a session-ended ping right after a successful sign-out', async () => {
+    const sessionBody = JSON.stringify({
+      session: { expiresAt: '2026-08-01T00:00:00.000Z' },
+      user: { id: 'user_1', email: 'ada@example.com', name: 'Ada' },
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((input: RequestInfo | URL) => {
+        const url = typeof input === 'string' ? input : input.toString();
+        if (url.includes('/sign-out')) {
+          return Promise.resolve(new Response(JSON.stringify({ status: true }), { status: 200 }));
+        }
+        return Promise.resolve(new Response(sessionBody, { status: 200 }));
+      }),
+    );
+    const sendMessage = vi.fn();
+    vi.stubGlobal('chrome', { runtime: { sendMessage } });
+
+    renderShell();
+    await screen.findByText('ada@example.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    await waitFor(() => expect(screen.getByText('Sign-in content')).toBeInTheDocument());
+
+    expect(sendMessage).toHaveBeenCalledWith(
+      'test-extension-id',
+      { type: 'session-ended' },
+      expect.any(Function),
+    );
+  });
 });

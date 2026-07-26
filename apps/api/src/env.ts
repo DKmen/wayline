@@ -11,6 +11,11 @@ const schema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   APP_URL: z.string().url(),
   DASHBOARD_URL: z.string().url(),
+  // Empty default until a real extension build exists to configure — the ID differs
+  // between a dev-loaded unpacked build and the published Chrome Web Store ID
+  // (mirrors apps/dashboard's VITE_EXTENSION_ID, WAYLI-33). Used by the extension-origin
+  // guard (WAYLI-34) to allow-list exactly one chrome-extension:// origin.
+  EXTENSION_ID: z.string().default(''),
 });
 
 /** Zod-validated process env for apps/api — boot fails loudly on a missing/invalid var. */

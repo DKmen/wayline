@@ -2,6 +2,9 @@ import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/utils/define-background';
 import { hostPermissionPatternFor } from '../../utils/hostPermissionPattern';
 import { isRestrictedUrl } from '../../utils/isRestrictedUrl';
+import { isSessionEndedMessage, isSessionReadyMessage } from '../../lib/session/messages';
+import { registerCookieWatcher } from '../../lib/session/cookie-watcher';
+import { handleSessionEnded, handleSessionReady } from './session';
 
 export type StartRecordingResult =
   | { ok: true }
@@ -72,11 +75,14 @@ export default defineBackground(() => {
   });
 
   // externally_connectable restricts senders to https://app.wayline.app/* (wxt.config.ts) —
-  // the browser enforces that boundary before this listener ever runs (WAYLI-33).
+  // the browser enforces that boundary before this listener ever runs (WAYLI-33, WAYLI-34).
   browser.runtime.onMessageExternal.addListener((message: unknown) => {
-    if (!isPingMessage(message)) return;
-    return Promise.resolve({ installed: true });
+    if (isPingMessage(message)) return Promise.resolve({ installed: true });
+    if (isSessionReadyMessage(message)) return handleSessionReady();
+    if (isSessionEndedMessage(message)) return handleSessionEnded();
   });
+
+  registerCookieWatcher(handleSessionEnded, browser.cookies.onChanged);
 
   // Exposed unconditionally for the Playwright build/load + restricted-page e2e suite
   // (apps/extension/e2e) — this is a pre-launch scaffold, not yet CWS-published, so there's
