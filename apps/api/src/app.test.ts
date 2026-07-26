@@ -13,7 +13,7 @@ async function buildTestApp() {
   });
 
   // '' means the extension-origin guard does not apply; these tests exercise app-level health/routing only.
-  return { app: createApp(auth, db, ''), close };
+  return { app: createApp(auth, db, '', 'http://localhost:4400'), close };
 }
 
 describe('createApp', () => {

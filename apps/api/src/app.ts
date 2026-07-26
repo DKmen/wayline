@@ -13,11 +13,17 @@ type Auth = ReturnType<typeof createAuth>;
  * Builds the Wayline API Hono app: Better Auth under /api/auth, tenant routes under /v1.
  * extensionId configures the origin guard (WAYLI-34) — pass '' to reject every
  * chrome-extension:// caller (the same fail-closed default as env.EXTENSION_ID).
+ * dashboardOrigin is the allow-listed dashboard origin for that same guard.
  */
-export function createApp(auth: Auth, db: DbExecutor, extensionId: string): Hono<AppEnv> {
+export function createApp(
+  auth: Auth,
+  db: DbExecutor,
+  extensionId: string,
+  dashboardOrigin: string,
+): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
 
-  app.use('*', extensionOriginGuard(extensionId));
+  app.use('*', extensionOriginGuard(extensionId, dashboardOrigin));
 
   app.use('*', async (c, next) => {
     const start = Date.now();

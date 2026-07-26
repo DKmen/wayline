@@ -10,7 +10,7 @@ async function buildHarness() {
   const { db, close } = await createTestDb();
   const mailer = { send: vi.fn(async () => {}) };
   const auth = createAuth({ db, mailer, secret: 'a'.repeat(32), baseURL: 'http://localhost:3000' });
-  const app = createApp(auth, db, EXTENSION_ID);
+  const app = createApp(auth, db, EXTENSION_ID, 'http://localhost:4400');
   return { app, db, close };
 }
 
@@ -72,6 +72,18 @@ describe('extension session endpoints (WAYLI-34 acceptance)', () => {
       const res = await app.request('/api/auth/get-session', { headers: extensionHeaders('') });
       expect(res.status).toBe(200);
       expect(await res.json()).toBeNull();
+    } finally {
+      await close();
+    }
+  });
+
+  it('rejects a request from an arbitrary third-party origin on a real /v1 route (CSRF check)', async () => {
+    const { app, close } = await buildHarness();
+    try {
+      const res = await app.request('/v1/me/workspaces', {
+        headers: { origin: 'https://evil.example' },
+      });
+      expect(res.status).toBe(403);
     } finally {
       await close();
     }

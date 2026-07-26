@@ -15,7 +15,7 @@ async function buildHarness() {
   };
   const auth = createAuth({ db, mailer, secret: 'a'.repeat(32), baseURL: 'http://localhost:3000' });
   // '' means the extension-origin guard does not apply; these tests exercise dashboard flows only.
-  const app = createApp(auth, db, '');
+  const app = createApp(auth, db, '', 'http://localhost:4400');
 
   /**
    * Real magic-link sign-in to obtain a genuine session cookie — each caller uses a

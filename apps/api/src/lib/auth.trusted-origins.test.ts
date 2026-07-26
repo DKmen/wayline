@@ -34,7 +34,7 @@ describe('createAuth trustedOrigins', () => {
         trustedOrigins: ['http://localhost:4400'],
       });
       // '' means the extension-origin guard does not apply; these tests exercise trusted-origin checks only.
-      const app = createApp(auth, db, '');
+      const app = createApp(auth, db, '', 'http://localhost:4400');
 
       const res = await postWithOrigin(app, 'http://localhost:4400');
 
@@ -55,7 +55,7 @@ describe('createAuth trustedOrigins', () => {
         baseURL: 'http://localhost:3000',
         trustedOrigins: ['http://localhost:4400'],
       });
-      const app = createApp(auth, db, '');
+      const app = createApp(auth, db, '', 'http://localhost:4400');
 
       const res = await postWithOrigin(app, 'http://evil.example.com');
 
