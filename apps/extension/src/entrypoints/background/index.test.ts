@@ -168,6 +168,39 @@ describe('background main()', () => {
     ).toBe(handleStartRecording);
   });
 
+  it('records a valid action-candidate onto the dev-only test hook instead of forwarding it as a start-recording message', async () => {
+    backgroundDefinition.main();
+    const listener = addListener.mock.calls[0]![0] as (
+      message: unknown,
+    ) => Promise<unknown> | undefined;
+    const candidate = {
+      type: 'action-candidate',
+      action: 'click',
+      target: {
+        tagName: 'button',
+        role: 'button',
+        accessibleName: 'Submit',
+        fieldType: null,
+        fieldName: null,
+        bbox: { x: 0, y: 0, w: 0, h: 0, vw: 1440, vh: 900 },
+      },
+      url: 'https://fixture.wayline.app/forms',
+      pageTitle: 'Forms',
+      viewport: { w: 1440, h: 900 },
+      instruction: "Click 'Submit'",
+      sensitiveFieldDetected: false,
+      timestamp: 1_700_000_000_000,
+    };
+
+    const result = await listener(candidate);
+
+    expect(result).toBeUndefined();
+    expect(executeScript).not.toHaveBeenCalled();
+    expect(
+      (globalThis as { __wayline_testActionCandidates?: unknown[] }).__wayline_testActionCandidates,
+    ).toContainEqual(candidate);
+  });
+
   it('registers an external message listener that responds to a ping', async () => {
     backgroundDefinition.main();
     const listener = addListenerExternal.mock.calls[0]![0] as (

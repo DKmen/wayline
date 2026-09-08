@@ -12,7 +12,9 @@ interface ExtensionFixtures {
 /**
  * Loads the *built* extension into a persistent Chromium context — MV3 extension loading
  * needs `--load-extension`, which only `launchPersistentContext` supports (docs/06-extension-spec.md §8).
- * Run `pnpm build` before this suite; it loads `.output/chrome-mv3`, not a dev server.
+ * Run `pnpm build:e2e` before this suite (not plain `build`) — it loads `.output/chrome-mv3`,
+ * not a dev server, and `build:e2e` pre-grants the fixture app's origin so specs that call
+ * the real `chrome.scripting.executeScript` (e.g. capture-no-values.spec.ts) can succeed.
  */
 export const test = base.extend<ExtensionFixtures>({
   // eslint-disable-next-line no-empty-pattern -- Playwright's fixture API requires this destructure shape.
