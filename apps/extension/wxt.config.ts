@@ -6,7 +6,7 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   srcDir: 'src',
   modules: ['@wxt-dev/module-react'],
-  manifest: {
+  manifest: () => ({
     name: 'Wayline',
     description: 'Record a walkthrough of any task and share it as a live, guided flow.',
     permissions: [
@@ -19,7 +19,14 @@ export default defineConfig({
       'scripting',
     ],
     optional_host_permissions: ['https://*/*', 'http://*/*'],
-    host_permissions: ['https://*.wayline.app/*'],
+    host_permissions: [
+      'https://*.wayline.app/*',
+      // Playwright's persistent-context extension harness can't simulate the toolbar-icon
+      // click MV3's activeTab grant requires, so the e2e-only build additionally pre-grants
+      // the fixture app's origin (apps/extension/e2e/capture-no-values.spec.ts). Never set
+      // for the production/CWS build — see apps/extension/package.json's `build:e2e` script.
+      ...(process.env.WAYLINE_E2E === 'true' ? ['http://localhost:4300/*'] : []),
+    ],
     externally_connectable: { matches: ['https://app.wayline.app/*'] },
-  },
+  }),
 });

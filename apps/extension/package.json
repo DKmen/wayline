@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "wxt",
     "build": "wxt build",
+    "build:e2e": "WAYLINE_E2E=true wxt build",
     "postinstall": "wxt prepare",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",

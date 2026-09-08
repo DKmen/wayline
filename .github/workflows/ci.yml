@@ -107,8 +107,11 @@ jobs:
         if: always()
         run: pnpm --filter @wayline/dashboard test:e2e --grep @smoke
       - name: Build extension (Playwright loads the built .output/, not a dev server)
+        # build:e2e pre-grants the fixture app's origin as a host_permission (wxt.config.ts) —
+        # Playwright can't simulate the toolbar-icon click MV3's activeTab grant needs, so the
+        # capture e2e spec needs this to call chrome.scripting.executeScript for real.
         if: always()
-        run: pnpm --filter @wayline/extension build
+        run: pnpm --filter @wayline/extension build:e2e
       - name: Install Playwright Chromium (extension)
         if: always()
         run: pnpm --filter @wayline/extension exec playwright install --with-deps chromium

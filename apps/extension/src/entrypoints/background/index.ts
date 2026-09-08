@@ -4,6 +4,7 @@ import { hostPermissionPatternFor } from '../../utils/hostPermissionPattern';
 import { isRestrictedUrl } from '../../utils/isRestrictedUrl';
 import { isSessionEndedMessage, isSessionReadyMessage } from '../../lib/session/messages';
 import { registerCookieWatcher } from '../../lib/session/cookie-watcher';
+import { isActionCandidateMessage } from '../../lib/capture/messages';
 import { handleSessionEnded, handleSessionReady } from './session';
 
 export type StartRecordingResult =
@@ -64,6 +65,17 @@ export default defineBackground(() => {
   // Sent from the popup (not a content script), so there's no `sender.tab` to read from —
   // the popup queries the active tab itself and passes tabId/url explicitly.
   browser.runtime.onMessage.addListener((message: unknown) => {
+    if (isActionCandidateMessage(message)) {
+      // Thin passthrough only — WAYLI-37 replaces this with real debounce/assembly and
+      // chrome.storage.session persistence. __wayline_testActionCandidates lets the
+      // Playwright capture e2e spec observe what the content script actually sent.
+      (
+        globalThis as { __wayline_testActionCandidates?: unknown[] }
+      ).__wayline_testActionCandidates?.push(message);
+      console.debug('[wayline] action-candidate', message.action, message.url);
+      return;
+    }
+
     if (!isStartRecordingMessage(message)) return;
 
     return handleStartRecording(
@@ -84,8 +96,11 @@ export default defineBackground(() => {
 
   registerCookieWatcher(handleSessionEnded, browser.cookies.onChanged);
 
-  // Exposed unconditionally for the Playwright build/load + restricted-page e2e suite
-  // (apps/extension/e2e) — this is a pre-launch scaffold, not yet CWS-published, so there's
-  // no hardening reason to gate this behind a dev-only build mode yet (revisit in S12).
-  Object.assign(globalThis, { __wayline_testHandleStartRecording: handleStartRecording });
+  // Exposed unconditionally for the Playwright build/load + restricted-page + capture e2e
+  // suite (apps/extension/e2e) — this is a pre-launch scaffold, not yet CWS-published, so
+  // there's no hardening reason to gate this behind a dev-only build mode yet (revisit in S12).
+  Object.assign(globalThis, {
+    __wayline_testHandleStartRecording: handleStartRecording,
+    __wayline_testActionCandidates: [],
+  });
 });
